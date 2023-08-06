@@ -26,9 +26,17 @@ The detailed breakdown of the code is as follows:
 
 - **switchTab**: This function switches to a tab. It takes the DOM element representing the tab and the index of the tab as parameters.
 
-- **createTableHTML**: This function generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table.
+- **createTableHTML**: This function generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table. When are headers are empty, no HTML is generated for the Table headers.
 
-- **displayNoDataMessage**: This function displays a message indicating that no data could be found.
+- **getHeaders**: This function maps the keys of a row to an array of header objects. It sets default values for the alignment and text color, and updates these values based on any alignment or color tags in the header.
+
+- **getRowHTML**: This function generates the HTML for a row in a table. It starts with an opening `<tr>` tag, adding a class for alternate rows, and generates the HTML for each cell in the row.
+
+- **getCellHTML**: This function generates the HTML for a cell in a table. It handles different cases based on the cell value and any tags in it.
+
+- **displayNoDataMessage**: This function displays a message indicating that no data could be found. It sets the container's content to an error message.
+
+- **DOM Event Listener**: When the document is loaded, all widgets of type 'ttmTabsWidget' and 'ttmTableWidget' are initialized. This is done by adding an event listener to the `DOMContentLoaded` event. The event listener function gets all elements with the class 'ttmTabsWidget' or 'ttmTableWidget', and for each element, it calls the `ttmCreateGSTWidget` function to create a widget.
 
 ## Special Tags
 
