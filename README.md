@@ -44,7 +44,7 @@ This project relies on the Tailwind CSS library. You can find the documentation 
 
 ## Installation
 
-### Webpage <head>
+### Install in Webpage "<head>"
 To install and use these widgets, you need to add the Tailwind CSS link, the style for the function, and the script enclosing the functions to the header of your webpage.
 ```html
 <!-- Add this to your webpage's <head> -->
@@ -52,7 +52,7 @@ To install and use these widgets, you need to add the Tailwind CSS link, the sty
 /* <style> content of ttmTabsWidgetStyles.css or ttmTabsWidgetStyles_minified.css */
 <script> /* content of ttmTabsWidget.js or ttmTabsWidget_minified.js */ </script>
 ```
-### Webpage <body>
+### Install in Webpage "<body>"
 The div containers for the table or tabs widgets need to be added to the body of the webpage, wherever they need to be displayed.
 
 - **Install Tabs Widget**: Add this to your webpage to display a Tabs Widget. Replace "GOOGLE_SHEET_ID"by the published ID of your Google Sheet
