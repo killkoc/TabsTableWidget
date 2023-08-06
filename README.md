@@ -18,7 +18,7 @@ The detailed breakdown of the code is as follows:
 
 - **parseCSV**: Parses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
 
-- **initializeTabs**: Initializes the tabs in the Tabs widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
+- **initializeTabs**: Initializes the tabs in the Tabs widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names. The assumption is that the first column of the Google Sheet is handled in a special manner as it contains information to generate tabs and filter the respective tab tables accordingly. The function takes the uniques of the first column as Tab Names and then filters the table rows by tab names.
 
 - **initializeTable**: Initializes the table in the Table widget. It takes the parsed Google Sheet data as a parameter.
 
