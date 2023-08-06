@@ -16,11 +16,11 @@ The detailed breakdown of the code is as follows:
 
 - **fetchGSheetData**: Fetches data from a Google Sheet. It takes the URL to the Google Sheet data as a parameter and returns a promise that resolves with the fetched data as a string.
 
-- **parseCSV**: Pparses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
+- **parseCSV**: Parses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
 
-- **initializeTabs**: Initializes the tabs in the widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
+- **initializeTabs**: Initializes the tabs in the Tabs widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
 
-- **initializeTable**: Initializes the table in the widget. It takes the parsed Google Sheet data as a parameter.
+- **initializeTable**: Initializes the table in the Table widget. It takes the parsed Google Sheet data as a parameter.
 
 - **createTab**: Creates a tab element. It takes the name of the category for the tab and the index of the tab as parameters and returns a li element representing the tab.
 
