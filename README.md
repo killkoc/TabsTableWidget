@@ -44,13 +44,28 @@ This project relies on the Tailwind CSS library. You can find the documentation 
 
 ## Installation
 
-To install and use these widgets, you need to add the Tailwind CSS link, the style for the function, and the script enclosing the functions to the header of your webpage. The div containers for the table or tabs widgets need to be added to the body of the webpage.
-
+### Webpage <head>
+To install and use these widgets, you need to add the Tailwind CSS link, the style for the function, and the script enclosing the functions to the header of your webpage.
 ```html
 <!-- Add this to your webpage's <head> -->
 <link href="https://cdn.tailwindcss.com/2.2.19/tailwind.min.css" rel="stylesheet">
-<style> /* content of ttmTabsWidgetStyles.css */ </style>
-<script> /* content of ttmTabsWidget.js or ttmTabsWidgetMini.js */ </script>
+/* <style> content of ttmTabsWidgetStyles.css or ttmTabsWidgetStyles_minified.css */
+<script> /* content of ttmTabsWidget.js or ttmTabsWidget_minified.js */ </script>
+```
+### Webpage <body>
+The div containers for the table or tabs widgets need to be added to the body of the webpage, wherever they need to be displayed.
+
+- **Install Tabs Widget**: Add this to your webpage to display a Tabs Widget. Replace "GOOGLE_SHEET_ID"by the published ID of your Google Sheet
+```html
+<!-- Add this to your webpage's <body> -->
+/* ttmTabsWidgetDivTable_minified.html */
+<div class="ttmTabsWidget container mx-auto" data-ttmGSID="GOOGLE_SHEET_ID"><div class="flex justify-center"><div class="w-full"><div class="bg-white shadow-sm rounded-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div></div></div><script>if(typeof ttmCreateGSTWidget!=='function'){Array.from(document.getElementsByClassName('ttmTabsWidget')).forEach(el=>{el.innerHTML=`<div style="height:192px;background-color:#D3D3D3;color:#808080;display:flex;align-items:center;justify-content:center;flex-direction:column;"><p>EC Teams Tabs Widget from Google Sheets Data</p><br><p>No data available yet. Attach a Data Attribute to this object, named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p></div>`;});}</script>```
+
+- **Install Table Widget**: Add this to your webpage to display a Table Widget. Replace "YOUR_GOOGLE_SHEET_ID"by the published ID of your Google Sheet
+```html
+<!-- Add this to your webpage's <body> -->
+/* ttmTabsWidgetDivTable_minified.html */
+<div class="ttmTableWidget container mx-auto" data-ttmGSID="GOOGLE_SHEET_ID"><div class="flex justify-center"><div class="w-full"><div class="bg-white shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div></div></div><script>if(typeof ttmCreateGSTWidget!=='function'){Array.from(document.getElementsByClassName('ttmTableWidget')).forEach(el=>{el.innerHTML=`<div style="height:192px;background-color:#D3D3D3;color:#808080;display:flex;align-items:center;justify-content:center;flex-direction:column;"><p>Camps Pricing Table Widget from Google Sheets Data</p><br><p>No data available yet. Attach a Data Attribute to this object, named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p></div>`;});}</script>
 ```
 
 ## Special Tags
