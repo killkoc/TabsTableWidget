@@ -55,6 +55,7 @@ To install and use these widgets, you need to add the Tailwind CSS link, the sty
 <script>
 /* Add your function's script here */
 </script>
+```
 
 ## Special Tags
 
