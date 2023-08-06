@@ -49,10 +49,8 @@ To install and use these widgets, you need to add the Tailwind CSS link, the sty
 ```html
 <!-- Add this to your webpage's <head> -->
 <link href="https://cdn.tailwindcss.com/2.2.19/tailwind.min.css" rel="stylesheet">
-<style> /* content of */ </style>
-<script>
-/* Add your function's script here */
-</script>
+<style> /* content of ttmTabsWidgetStyles.css */ </style>
+<script> /* content of ttmTabsWidget.js or ttmTabsWidgetMini.js */ </script>
 ```
 
 ## Special Tags
