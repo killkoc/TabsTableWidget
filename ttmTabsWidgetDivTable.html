@@ -1,0 +1,29 @@
+<html><body>
+<!-- Main container for the table widget -->
+<div class="ttmTableWidget container mx-auto" data-ttmGSID="YOUR_GOOGLE_SHEET_ID">
+    <div class="flex justify-center">
+        <div class="w-full">
+            <!-- The widget, with a white background, medium shadow, large rounded corners, and vertical margin -->
+	        <div class="bg-white shadow-sm rounded-sm my-6">
+	            <!-- The container for the widget's content -->
+	            <div class="w-full widget-container"></div>
+	        </div>
+        </div>
+    </div>
+</div>
+<script>
+    /* Content Message when ttmTabsWidget is not available yet */
+    if(typeof ttmCreateGSTWidget !== 'function') {
+            Array.from(document.getElementsByClassName('ttmTableWidget')).forEach(el => {
+                el.innerHTML=`
+                    <div style="height: 192px; background-color: #D3D3D3; color: #808080; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                        <p>Responsive Widget from Google Sheets Data</p>
+                        <br>
+                        <p>No data available yet. Attach a Data Attribute to this object, named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</script>
+</body></html>
