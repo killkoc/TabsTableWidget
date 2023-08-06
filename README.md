@@ -14,27 +14,27 @@ The detailed breakdown of the code is as follows:
 
 - **ttmCreateGSTWidget**: This is the main function that initializes a widget. It takes three parameters: the DOM element that will contain the widget, the index of the widget, and the type of the widget. The function first checks if the widget has already been initialized. If not, it sets an attribute to prevent the widget from being initialized multiple times. It then fetches the Google Sheet ID from a data attribute in the widget element and constructs the URL to fetch the Google Sheet data as CSV. Depending on the widget type, it initializes tabs or a table with the parsed data.
 
-- **fetchGSheetData**: This function fetches data from a Google Sheet. It takes the URL to the Google Sheet data as a parameter and returns a promise that resolves with the fetched data as a string.
+- **fetchGSheetData**: Fetches data from a Google Sheet. It takes the URL to the Google Sheet data as a parameter and returns a promise that resolves with the fetched data as a string.
 
-- **parseCSV**: This function parses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
+- **parseCSV**: Pparses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
 
-- **initializeTabs**: This function initializes the tabs in the widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
+- **initializeTabs**: Initializes the tabs in the widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
 
-- **initializeTable**: This function initializes the table in the widget. It takes the parsed Google Sheet data as a parameter.
+- **initializeTable**: Initializes the table in the widget. It takes the parsed Google Sheet data as a parameter.
 
-- **createTab**: This function creates a tab element. It takes the name of the category for the tab and the index of the tab as parameters and returns a li element representing the tab.
+- **createTab**: Creates a tab element. It takes the name of the category for the tab and the index of the tab as parameters and returns a li element representing the tab.
 
-- **switchTab**: This function switches to a tab. It takes the DOM element representing the tab and the index of the tab as parameters.
+- **switchTab**: Switches to a tab. It takes the DOM element representing the tab and the index of the tab as parameters.
 
-- **createTableHTML**: This function generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table. When are headers are empty, no HTML is generated for the Table headers.
+- **createTableHTML**: Generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table. When are headers are empty, no HTML is generated for the Table headers.
 
-- **getHeaders**: This function maps the keys of a row to an array of header objects. It sets default values for the alignment and text color, and updates these values based on any alignment or color tags in the header.
+- **getHeaders**: Maps the keys of a row to an array of header objects. It sets default values for the alignment and text color, and updates these values based on any alignment or color tags in the header. Also manages the {} tags in headers.
 
-- **getRowHTML**: This function generates the HTML for a row in a table. It starts with an opening `<tr>` tag, adding a class for alternate rows, and generates the HTML for each cell in the row.
+- **getRowHTML**: Generates the HTML for a row in a table. It starts with an opening `<tr>` tag, adding a class for alternate rows, and generates the HTML for each cell in the row. Also manages most {} tags in cells.
 
-- **getCellHTML**: This function generates the HTML for a cell in a table. It handles different cases based on the cell value and any tags in it.
+- **getCellHTML**: Generates the HTML for a cell in a table. It handles different cases based on the cell value and any tags in it. Also manages {B} tags in cells.
 
-- **displayNoDataMessage**: This function displays a message indicating that no data could be found. It sets the container's content to an error message.
+- **displayNoDataMessage**: Displays a message indicating that no data could be found. It sets the container's content to an error message.
 
 - **DOM Event Listener**: When the document is loaded, all widgets of type 'ttmTabsWidget' and 'ttmTableWidget' are initialized. This is done by adding an event listener to the `DOMContentLoaded` event. The event listener function gets all elements with the class 'ttmTabsWidget' or 'ttmTableWidget', and for each element, it calls the `ttmCreateGSTWidget` function to create a widget.
 
