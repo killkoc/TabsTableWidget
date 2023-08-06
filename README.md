@@ -38,6 +38,24 @@ The detailed breakdown of the code is as follows:
 
 - **DOM Event Listener**: When the document is loaded, all widgets of type 'ttmTabsWidget' and 'ttmTableWidget' are initialized. This is done by adding an event listener to the `DOMContentLoaded` event. The event listener function gets all elements with the class 'ttmTabsWidget' or 'ttmTableWidget', and for each element, it calls the `ttmCreateGSTWidget` function to create a widget.
 
+## Dependencies
+
+This project relies on the Tailwind CSS library. You can find the documentation for Tailwind CSS [here](https://tailwindcss.com/docs).
+
+## Installation
+
+To install and use these widgets, you need to add the Tailwind CSS link, the style for the function, and the script enclosing the functions to the header of your webpage. The div containers for the table or tabs widgets need to be added to the body of the webpage.
+
+```html
+<!-- Add this to your webpage's <head> -->
+<link href="https://cdn.tailwindcss.com/2.2.19/tailwind.min.css" rel="stylesheet">
+<style>
+/* Add your function's styles here */
+</style>
+<script>
+/* Add your function's script here */
+</script>
+
 ## Special Tags
 
 The layout of the data in the widgets can be customized using special tags in the headers and cells of the Google Sheet. These tags are enclosed in curly braces {}. The tags in headers apply to all the cells in the same column, while the tags in cells apply only to that given cell but override everything set by default or by tags in headers.
