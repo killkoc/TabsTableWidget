@@ -49,9 +49,7 @@ To install and use these widgets, you need to add the Tailwind CSS link, the sty
 ```html
 <!-- Add this to your webpage's <head> -->
 <link href="https://cdn.tailwindcss.com/2.2.19/tailwind.min.css" rel="stylesheet">
-<style>
-/* Add your function's styles here */
-</style>
+<style> /* content of */ </style>
 <script>
 /* Add your function's script here */
 </script>
