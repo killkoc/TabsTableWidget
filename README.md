@@ -1,2 +1,61 @@
 # TabsTableWidget
-This JavaScript code is designed to create and manage widgets that fetch data from a Google Sheet and display it in a tabbed layout or a table layout.
+
+## Introduction
+
+This JavaScript code is designed to create and manage widgets that fetch data from a Google Sheet and display it in a tabbed layout or a table layout. The widgets are initialized when the document is loaded. Each widget is associated with a Google Sheet via a data attribute in its HTML element. The data from the Google Sheet is fetched and parsed into a format that can be used to populate the widget. The widgets can be of two types: 'ttmTabsWidget' and 'ttmTableWidget'.
+
+The 'ttmTabsWidget' displays the data in a tabbed layout, with each tab corresponding to a unique value in the first column of the Google Sheet data. The rows of data displayed in each tab are filtered based on the value in the first column. The 'ttmTableWidget' displays the data in a table layout. If all the headers in the Google Sheet data are empty, the widget only draws the rows without a header element.
+
+The layout of the data in the widgets can be customized using special tags in the headers and cells of the Google Sheet. These tags are enclosed in curly braces {}. The tags in headers apply to all the cells in the same column, while the tags in cells apply only to that given cell but override everything set by default or by tags in headers.
+
+## Detailed Breakdown
+
+The detailed breakdown of the code is as follows:
+
+- **ttmCreateGSTWidget**: This is the main function that initializes a widget. It takes three parameters: the DOM element that will contain the widget, the index of the widget, and the type of the widget. The function first checks if the widget has already been initialized. If not, it sets an attribute to prevent the widget from being initialized multiple times. It then fetches the Google Sheet ID from a data attribute in the widget element and constructs the URL to fetch the Google Sheet data as CSV. Depending on the widget type, it initializes tabs or a table with the parsed data.
+
+- **fetchGSheetData**: This function fetches data from a Google Sheet. It takes the URL to the Google Sheet data as a parameter and returns a promise that resolves with the fetched data as a string.
+
+- **parseCSV**: This function parses CSV data into an array of objects. It takes the CSV data as a parameter and returns an array of objects representing the CSV data.
+
+- **initializeTabs**: This function initializes the tabs in the widget. It takes the parsed Google Sheet data as a parameter and returns a set of unique tab names.
+
+- **initializeTable**: This function initializes the table in the widget. It takes the parsed Google Sheet data as a parameter.
+
+- **createTab**: This function creates a tab element. It takes the name of the category for the tab and the index of the tab as parameters and returns a li element representing the tab.
+
+- **switchTab**: This function switches to a tab. It takes the DOM element representing the tab and the index of the tab as parameters.
+
+- **createTableHTML**: This function generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table.
+
+- **displayNoDataMessage**: This function displays a message indicating that no data could be found.
+
+## Special Tags
+
+The layout of the data in the widgets can be customized using special tags in the headers and cells of the Google Sheet. These tags are enclosed in curly braces {}. The tags in headers apply to all the cells in the same column, while the tags in cells apply only to that given cell but override everything set by default or by tags in headers.
+
+### In Headers
+
+The tags that can be used in headers are {C}, {L}, {R}, {r}, {g}, {b}, and {fN}, where N is a number. The {W} and {B} tags do not work in headers. The tags in headers apply to all the cells in the same column.
+
+- **{C}, {L}, {R}**: These tags set the alignment of the text in the cells of the column. {C} sets the alignment to center, {L} sets the alignment to left, and {R} sets the alignment to right.
+
+- **{r}, {g}, {b}**: These tags set the color of the text in the cells of the column. {r} sets the color to red, {g} sets the color to green, and {b} sets the color to blue.
+
+- **{fN}**: This tag sets the font size of the text in the cells of the column. N is the size of the font.
+
+### In Cells
+
+The tags that can be used in cells are {C}, {L}, {R}, {r}, {g}, {b}, {W}, {B}, and {fN}, where N is a number.
+
+- **{C}, {L}, {R}**: These tags set the alignment of the text in the cell. {C} sets the alignment to center, {L} sets the alignment to left, and {R} sets the alignment to right.
+
+- **{r}, {g}, {b}**: These tags set the color of the text in the cell. {r} sets the color to red, {g} sets the color to green, and {b} sets the color to blue.
+
+- **{W}**: This tag makes the cell span multiple columns. The cell will span as many columns as there are consecutive cells with no data.
+
+- **{B}**: This tag turns the cell into a button. The text in the cell should be in the format "ButtonName>ButtonURL". The button will have the name "ButtonName" and will open the URL "ButtonURL" when clicked.
+
+- **{fN}**: This tag sets the font size of the text in the cell. N is the size of the font.
+
+The tags in cells apply only to that given cell but override everything set by default or by tags in headers.
