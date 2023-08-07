@@ -80,7 +80,7 @@ The tags that can be used in headers are {C}, {L}, {R}, {r}, {g}, {b}, and {fN},
 
 - **{r}, {g}, {b}**: These tags set the color of the text in the cells of the column. {r} sets the color to red, {g} sets the color to green, and {b} sets the color to blue.
 
-- **{fN}**: This tag sets the font size of the text in the cells of the column. N is the size of the font.
+- **{fN}**: This tag sets the font size of the text in the cells of the column. N is the size of the font in pixels.
 
 ### In Cells
 
@@ -94,6 +94,6 @@ The tags that can be used in cells are {C}, {L}, {R}, {r}, {g}, {b}, {W}, {B}, a
 
 - **{B}**: This tag turns the cell into a button. The text in the cell should be in the format "ButtonName>ButtonURL". The button will have the name "ButtonName" and will open the URL "ButtonURL" when clicked.
 
-- **{fN}**: This tag sets the font size of the text in the cell. N is the size of the font.
+- **{fN}**: This tag sets the font size of the text in the cell. N is the size of the font in pixels.
 
-The tags in cells apply only to that given cell but override everything set by default or by tags in headers.
+!!! The tags in cells apply only to that given cell but override everything set by default or by tags in headers.
