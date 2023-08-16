@@ -16,16 +16,12 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     const widgetId = `${widgetType}-${widgetIndex}`;
     widgetElement.id = widgetId;
     
-    // Store references to the DOM elements that will be used multiple times.
-    const ttmTabBar = document.querySelector(`#${widgetId} ul`);
-    const ttmTabContentsContainer = document.querySelector(`#${widgetId} .widget-container`);
-
     // We get the Google Sheet ID from a data attribute in the element of the widget.
     const GSheetID = widgetElement.getAttribute('data-ttmGSID');
 
     // If the data attribute is not set or is empty, we display a message indicating that no data could be found.
     if (!GSheetID) {
-        displayNoDataMessage();
+        displayNoDataMessage(widgetElement);
         return;
     }
 
@@ -36,11 +32,11 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     fetchGSheetData(GSheetURL)
         .then(data => {
             const GSheetData = parseCSV(data);
-            widgetType === 'ttmTabsWidget' ? initializeTabs(GSheetData) : initializeTable(GSheetData);
+            widgetType === 'ttmTabsWidget' ? initializeTabs(widgetElement,widgetId, GSheetData) : initializeTable(widgetElement, widgetId, GSheetData);
         })
         .catch(error => {
             console.error('Error fetching Google Sheet data:', error);
-            displayNoDataMessage();
+            displayNoDataMessage(widgetElement);
         });
 
     /**
@@ -82,10 +78,22 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Initializes the tabs in the widget.
      * 
+     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
+     * @param {string} widgetId The unique ID of the widget.
      * @param {Object[]} GSheetData The parsed Google Sheet data.
      * @returns {Set<string>} A set of unique tab names.
      */
-    function initializeTabs(GSheetData) {
+    function initializeTabs(widgetElement, widgetId, GSheetData) {
+        // Check if child elements already exist
+        if (widgetElement.children.length === 0) {
+            // Insert the additional structure into the 'ttmTableWidget' div
+            widgetElement.innerHTML = `<div class="flex justify-center"><div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div></div>`;
+        }
+        
+        // Store references to the DOM elements that will be used multiple times.
+        const tabBar = widgetElement.querySelector(`ul`);
+        const tabContentsContainer = widgetElement.querySelector(`.widget-container`);
+
         // Create document fragments to hold the new tabs and their contents.
         const tabBarFragment = document.createDocumentFragment();
         const tabContentsContainerFragment = document.createDocumentFragment();
@@ -99,7 +107,7 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
             const category = row[categoryName];
             if (!uniqueTabs.has(category)) {
                 uniqueTabs.add(category);
-                tabBarFragment.appendChild(createTab(category, tabIndex));
+                tabBarFragment.appendChild(createTab(widgetElement, widgetId, category, tabIndex));
                 tabIndex++;
             }
         });
@@ -108,19 +116,19 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
             tabContentsContainerFragment.appendChild(loadTabData(tab, index, GSheetData, categoryName));
         });
         // Add the new tabs and their contents to the DOM.
-        ttmTabBar.appendChild(tabBarFragment);
-        ttmTabContentsContainer.appendChild(tabContentsContainerFragment);
+        tabBar.appendChild(tabBarFragment);
+        tabContentsContainer.appendChild(tabContentsContainerFragment);
         // Automatically select the first tab.
-        ttmTabBar.firstElementChild.click();
+        tabBar.firstElementChild.click();
 
         // Add event listener to the tab bar.
-        ttmTabBar.addEventListener('click', (event) => {
+        tabBar.addEventListener('click', (event) => {
             // Check if the event target is a tab.
             if (event.target && event.target.matches('.ttmTab-element')) {
                 // Get the index of the tab.
-                const tabIndex = Array.from(ttmTabBar.children).indexOf(event.target);
+                const tabIndex = Array.from(tabBar.children).indexOf(event.target);
                 // Switch to the tab.
-                switchTab(event.target, tabIndex);
+                switchTab(widgetElement, widgetId, tabIndex);
             }
         });
 
@@ -157,11 +165,20 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Initializes the table in the widget.
      * 
+     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
+     * @param {string} widgetId The unique ID of the widget.
      * @param {Object[]} GSheetData The parsed Google Sheet data.
      */
-    function initializeTable(GSheetData) {
-        // Query the DOM for the table container.
-        const tableContainer = document.querySelector(`#${widgetId} .widget-container`);
+    function initializeTable(widgetElement, widgetId, GSheetData) {
+        
+        // Check if child elements already exist
+        if (widgetElement.children.length === 0) {
+            // Insert the additional structure into the 'ttmTableWidget' div
+            widgetElement.innerHTML = `<div class="flex justify-center"><div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div></div>`;
+        }
+
+        // Query the DOM for the existing or newly createdtable container.
+        const tableContainer = widgetElement.querySelector(`.widget-container`);
         // Create HTML for the table and add it to the container.
         const tableHTML = createTableHTML(GSheetData, true);
         tableContainer.innerHTML = tableHTML;
@@ -172,15 +189,17 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Creates a tab element.
      * 
+     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
+     * @param {string} widgetId The unique ID of the widget.
      * @param {string} category The name of the category for the tab.
      * @param {number} index The index of the tab.
      * @returns {HTMLElement} A li element representing the tab.
      */
-    function createTab(category, index) {
+    function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
         tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
         tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-5 py-3 block leading-normal">${category}</div>`;
-        tabElement.addEventListener('click', () => switchTab(index));
+        tabElement.addEventListener('click', () => switchTab(widgetElement, widgetId, index));
         return tabElement;
     }
 
@@ -188,12 +207,13 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
      * Switches to a tab.
      * 
      * @param {HTMLElement} tabElement The DOM element representing the tab.
+     * @param {string} widgetId The unique ID of the widget.
      * @param {number} tabIndex The index of the tab.
      */
-    function switchTab(tabIndex) {
+    function switchTab(widgetElement, widgetId, tabIndex) {
         // Query the DOM for all tabs and their contents.
-        const tabElements = document.querySelectorAll(`#${widgetId} ul li`);
-        const tabContents = document.querySelectorAll(`#${widgetId} .widget-container .tab-content, #${widgetId} .widget-container .table-content`);
+        const tabElements = widgetElement.querySelectorAll(`ul li`);
+        const tabContents = widgetElement.querySelectorAll(`.widget-container .tab-content, #${widgetId} .widget-container .table-content`);
         // Deselect all tabs and hide their contents.
         Array.from(tabElements).forEach((element, i) => {
             element.classList.remove('bg-blue-500');
@@ -235,14 +255,9 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         const rows = dataArray.map((row, index) => getRowHTML(row, headers, columnWidth, index)).join('');
 
         // Construct the HTML string
-        let tableHTML = `
-            <div class="relative overflow-x-auto shadow-sm ${roundedHeader ? 'sm:rounded-lg' : ''}">
-                <table class="ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400">
-                    ${allHeadersEmpty ? `<tr><td colspan="${totalColumns}" style="border-bottom: 1px solid #ccc;"></td></tr>` : `<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr>${headerCells}</tr></thead>`}
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
-        `;
+        let tableHTML = `<div class="relative overflow-x-auto shadow-sm ${roundedHeader ? 'sm:rounded-lg' : ''}"><table class="ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400">
+            ${allHeadersEmpty ? `<tr><td colspan="${totalColumns}" style="border-bottom: 1px solid #ccc;"></td></tr>` : `<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr>${headerCells}</tr></thead>`}
+            <tbody>${rows}</tbody></table></div>`;
 
         // Remove all colspan="1" attributes from the tableHTML
         tableHTML = tableHTML.replace(/colspan="1"\\s*/g, '');
@@ -406,8 +421,7 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
                 }
 
                 return `<td style="width: ${columnWidth}; font-size: ${fontSize}px" colspan="${cellColSpan}" class="px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle">
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="window.open('${buttonURL}', '_blank')">${buttonName}</button>
-                        </td>`;
+                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="window.open('${buttonURL}', '_blank')">${buttonName}</button></td>`;
             } else {
                 return `<td style="width: ${columnWidth}; font-size: ${fontSize}px" colspan="${cellColSpan}" class="px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle">${cellValue}</td>`;
             }
@@ -416,16 +430,15 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 
     /**
      * Displays a message indicating that no data could be found.
+     * 
+     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
      */
-    function displayNoDataMessage() {
+    function displayNoDataMessage(widgetElement) {
         // Query the DOM for the widget container.
-        const widgetContainer = document.querySelector(`#${widgetId} .widget-container`);
+        const widgetContainer = widgetElement.querySelector(`.widget-container`);
         // Set the container's content to an error message.
-        widgetContainer.innerHTML = `
-        <div style="width: 100%; height: 200px; background-color: lightgray; display: flex; justify-content: center; align-items: center;">
-            <p>Google Sheet not found! Add a Data Attribute named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p>
-        </div>
-        `;
+        widgetContainer.innerHTML = `<div style="width: 100%; height: 200px; background-color: lightgray; display: flex; justify-content: center; align-items: center;">
+            <p>Google Sheet not found! Add a Data Attribute named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p></div>`;
         // Log an error message to the console.
         console.error('Google Sheet not found! Add a Data Attribute named data-ttmGSID whose value is the published ID of the Google Sheet you want to access');
     }
