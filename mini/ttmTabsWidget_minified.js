@@ -1,1 +1,311 @@
-function ttmCreateGSTWidget(e,t,l){if(e.hasAttribute("ttmWidgetInit"))return;e.setAttribute("ttmWidgetInit","");let a=`${l}-${t}`;e.id=a;let r=e.getAttribute("data-ttmGSID");if(!r){c(e);return}let n=`https://docs.google.com/spreadsheets/d/e/${r}/pub?output=csv`;async function i(e){let t=await fetch(e);if(!t.ok)throw Error(`HTTP error! status: ${t.status}`);return await t.text()}function d(e,t,l,a){let r=e.querySelectorAll("ul li"),n=e.querySelector(".widget-container"),i=Object.keys(a),d=n.querySelector(`[data-tab-name="${i[l]}"]`),c=n.querySelectorAll(".table-content");if(c.forEach(e=>e.style.display="none"),r.forEach(e=>e.classList.remove("bg-blue-500")),r[l].classList.add("bg-blue-500"),d)d.style.display="block";else{let o=a[i[l]],p=function e(t,l,a){let r=s(a),n=document.createDocumentFragment(),i=document.createElement("div");i.style.display="block",i.classList.add("table-content"),i.dataset.tabName=t;let d=document.createElement("div");return d.className="relative overflow-x-auto shadow-sm",d.appendChild(r),i.appendChild(d),n.appendChild(i),n}(i[l],l,o);n.appendChild(p)}}function s(e){var t;let l=(t=e[0],Object.keys(t).map(e=>{let t="text-center",l=e,a="text-white",r="";l.includes("{C}")?(t="text-center",l=l.replace("{C}","")):l.includes("{L}")?(t="text-left",l=l.replace("{L}","")):l.includes("{R}")&&(t="text-right",l=l.replace("{R}","")),l.includes("{r}")?(a="text-red-500",l=l.replace("{r}","")):l.includes("{g}")?(a="text-green-500",l=l.replace("{g}","")):l.includes("{b}")&&(a="text-blue-500",l=l.replace("{b}",""));let n=l.match(/{f(\d+)}/);return n&&(r=n[1],l=l.replace(n[0],"")),l=l.split("_")[0],{header:l,alignment:t,originalHeader:e,textColor:a,fontSize:r}})),a=document.createElement("table");a.className="ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400";let r=l.every(({header:e})=>!e.trim());if(!r){let n=document.createElement("thead");n.className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400";let i=document.createElement("tr");l.forEach(({header:e,alignment:t,textColor:l,fontSize:a,columnWidth:r})=>{let n=document.createElement("th");n.scope="col",n.style.width=r,n.className=`px-5 py-5 border-b-2 border-gray-200 bg-blue-500 ${t} font-semibold ${l} uppercase align-middle`,n.innerHTML=a?`<span style="font-size:${a}px">${e}</span>`:e,i.appendChild(n)}),n.appendChild(i),a.appendChild(n)}let d=document.createElement("tbody");return e.forEach((e,t)=>{let a=function e(t,l,a,r){let n=document.createElement("tr");n.className=r%2==0?"":"bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600";let i=0;return l.forEach(({originalHeader:e,alignment:a,textColor:r,fontSize:d})=>{if(i>0){i--;return}let s=t[e],c=a,o="text-white"===r?"text-black":r,p=1,u=d?`font-size:${d}px`:"";if(s&&s.includes("{C}")?(c="text-center",s=s.replace("{C}","")):s&&s.includes("{L}")?(c="text-left",s=s.replace("{L}","")):s&&s.includes("{R}")&&(c="text-right",s=s.replace("{R}","")),s&&s.includes("{r}")?(o="text-red-500",s=s.replace("{r}","")):s&&s.includes("{g}")?(o="text-green-500",s=s.replace("{g}","")):s&&s.includes("{b}")&&(o="text-blue-500",s=s.replace("{b}","")),s&&s.includes("{W}")){s=s.replace("{W}","");let m=l.findIndex(({originalHeader:t})=>t===e)+1;for(;m<l.length&&(!t[l[m].originalHeader]||""===t[l[m].originalHeader]);)p++,i++,m++}let g=s.match(/{f(\d+)}/);g&&(u=`font-size:${g[1]}px`,s=s.replace(g[0],""));let f=function e(t,l,a,r,n,i){let d=document.createElement("td");if(d.style.width=t,d.colSpan=l,d.className=`px-3 py-5 border-b border-gray-200 bg-white ${r} ${n} align-middle`,i&&(d.style.cssText+=`; ${i}`),a.includes("{B}")){let[s,c]=a.replace("{B}","").split(">");c.startsWith("http://")||c.startsWith("https://")||(c=`https://${c}`);let o=document.createElement("button");o.className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded",o.onclick=()=>window.open(c,"_blank"),o.innerHTML=s,d.appendChild(o)}else d.innerHTML=a;return d}("",p,s,o,c,u);n.appendChild(f)}),n}(e,l,"",t);d.appendChild(a)}),a.appendChild(d),a}function c(e){e.innerHTML='<div class="flex justify-center items-center h-full text-gray-500 text-lg">No data available</div>'}i(n).then(t=>{let r=function e(t){t=t.replace(/\r\n/g,"\n");let[l,...a]=t.split("\n"),r=l.split(","),n=r.map((e,t)=>`${e}_${t}`);return a.map(e=>{let t=e.split(",");return Object.fromEntries(n.map((e,l)=>[e,t[l]||""]))})}(t);"ttmTabsWidget"===l?function e(t,l,a){if(0===t.children.length){let r=document.createElement("div");r.className="flex justify-center",r.innerHTML='<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>',t.appendChild(r)}let n=t.querySelector("ul"),i=Object.keys(a[0])[0],s={};a.forEach(e=>{let t=e[i];s[t]||(s[t]=[]);let{[i]:l,...a}=e;s[t].push(a)});let c=Object.keys(s),o=document.createDocumentFragment();c.forEach((e,a)=>{o.appendChild(function e(t,l,a,r){let n=document.createElement("li");return n.className="flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element",n.innerHTML=`<div class="text-xs font-bold uppercase px-5 py-3 block leading-normal">${a}</div>`,n}(t,l,e,a))}),n.appendChild(o),n.addEventListener("click",e=>{let a=e.target,r=Array.from(n.children),i=a.closest(".ttmTab-element");if(i){let c=r.indexOf(i);d(t,l,c,s)}}),n.firstChild&&d(t,l,0,s)}(e,a,r):function e(t,l,a){if(0===t.children.length){let r=document.createElement("div");r.className="flex justify-center",r.innerHTML='<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>',t.appendChild(r)}let n=t.querySelector(".widget-container"),i=s(a),d=document.createElement("div");d.className="relative overflow-x-auto shadow-sm sm:rounded-lg",d.appendChild(i),n.appendChild(d),n.classList.add("table-content")}(e,a,r)}).catch(t=>{console.error("Error fetching Google Sheet data:",t),c(e)})}window.addEventListener("load",function(){Array.from(document.getElementsByClassName("ttmTabsWidget")).forEach((e,t)=>{ttmCreateGSTWidget(e,t,"ttmTabsWidget")}),Array.from(document.getElementsByClassName("ttmTableWidget")).forEach((e,t)=>{ttmCreateGSTWidget(e,t,"ttmTableWidget")})},!1);
+function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
+    if (widgetElement.hasAttribute('ttmWidgetInit')) return;
+    widgetElement.setAttribute('ttmWidgetInit', '');
+    const widgetId = `${widgetType}-${widgetIndex}`;
+    widgetElement.id = widgetId;
+    const GSheetID = widgetElement.getAttribute('data-ttmGSID');
+    if (!GSheetID) {
+        displayNoDataMessage(widgetElement);
+        return;
+    }
+    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
+	fetchGSheetData(GSheetURL)
+        .then(data => {
+            const GSheetData = parseCSV(data);
+            widgetType === 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, GSheetData) : initializeTable(widgetElement, widgetId, GSheetData);
+        })
+        .catch(error => {
+            console.error('Error fetching Google Sheet data:', error);
+            displayNoDataMessage(widgetElement);
+        });
+
+    async function fetchGSheetData(GSheetURL) {
+        const response = await fetch(GSheetURL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.text();
+    }
+
+    function parseCSV(data) {
+        data = data.replace(/\r\n/g, '\n');
+        const [headerLine, ...rows] = data.split('\n');
+        const originalHeaders = headerLine.split(',');
+        const uniqueHeaders = originalHeaders.map((header, index) => `${header}_${index}`);
+        return rows.map(row => {
+            const cells = row.split(',');
+            return Object.fromEntries(uniqueHeaders.map((header, index) => [header, cells[index] || '']));
+        });
+    }
+
+function initializeTabs(widgetElement, widgetId, GSheetData) {
+    if (widgetElement.children.length === 0) {
+        const structure = document.createElement('div');
+        structure.className = "flex justify-center";
+        structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
+        widgetElement.appendChild(structure);
+    }
+
+    const tabBar = widgetElement.querySelector('ul');
+    const categoryName = Object.keys(GSheetData[0])[0];
+
+    const tabDataMap = {};
+    GSheetData.forEach(row => {
+        const category = row[categoryName];
+        if (!tabDataMap[category]) {
+            tabDataMap[category] = [];
+        }
+        const { [categoryName]: _, ...rest } = row;
+        tabDataMap[category].push(rest);
+    });
+
+    const uniqueTabs = Object.keys(tabDataMap);
+    const tabFragment = document.createDocumentFragment();
+    uniqueTabs.forEach((tab, index) => {
+        tabFragment.appendChild(createTab(widgetElement, widgetId, tab, index));
+    });
+
+    tabBar.appendChild(tabFragment);
+
+    tabBar.addEventListener('click', (event) => {
+        const target = event.target;
+        const tabElements = Array.from(tabBar.children);
+        const clickedTab = target.closest('.ttmTab-element');
+        if (clickedTab) {
+            const tabIndex = tabElements.indexOf(clickedTab);
+            switchTab(widgetElement, widgetId, tabIndex, tabDataMap);
+        }
+    });
+
+    if (tabBar.firstChild) {
+        switchTab(widgetElement, widgetId, 0, tabDataMap);
+    }
+}
+
+
+function loadTabData(tab, index, filteredData) {
+	const tableElement = createTableElement(filteredData);
+    const contentFragment = document.createDocumentFragment();
+    const tableContainer = document.createElement('div');
+    tableContainer.style.display = 'block'; // Changed this line
+    tableContainer.classList.add('table-content');
+    tableContainer.dataset.tabName = tab;
+    const divTableElement = document.createElement('div');
+    divTableElement.className = "relative overflow-x-auto shadow-sm";
+    divTableElement.appendChild(tableElement);
+    tableContainer.appendChild(divTableElement);
+    contentFragment.appendChild(tableContainer);
+    return contentFragment;
+}
+
+    function initializeTable(widgetElement, widgetId, GSheetData) {
+        if (widgetElement.children.length === 0) {
+            const structure = document.createElement('div');
+            structure.className = "flex justify-center";
+            structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>';
+            widgetElement.appendChild(structure);
+        }
+        const tableContainer = widgetElement.querySelector('.widget-container');
+        const tableElement = createTableElement(GSheetData);
+        const divTableElement = document.createElement('div');
+        divTableElement.className = "relative overflow-x-auto shadow-sm sm:rounded-lg";
+        divTableElement.appendChild(tableElement);
+        tableContainer.appendChild(divTableElement);
+        tableContainer.classList.add('table-content');
+    }
+
+    function createTab(widgetElement, widgetId, category, index) {
+        const tabElement = document.createElement('li');
+        tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
+        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-5 py-3 block leading-normal">${category}</div>`;
+        return tabElement;
+    }
+
+function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
+    const tabElements = widgetElement.querySelectorAll('ul li');
+    const tabContentsContainer = widgetElement.querySelector('.widget-container');
+    const tabNames = Object.keys(tabDataMap);
+    const existingTableContent = tabContentsContainer.querySelector(`[data-tab-name="${tabNames[tabIndex]}"]`);
+    
+    // Hide all existing tab contents
+    const allTableContents = tabContentsContainer.querySelectorAll('.table-content');
+    allTableContents.forEach(content => content.style.display = 'none');
+    
+    // Remove active class from all tabs
+    tabElements.forEach(tab => tab.classList.remove('bg-blue-500'));
+    
+    // Set the clicked tab to active
+    tabElements[tabIndex].classList.add('bg-blue-500');
+    
+    // Check if content for clicked tab is already loaded
+    if (existingTableContent) {
+		// If it's already loaded, just display it
+        existingTableContent.style.display = 'block';
+    } else {
+        // If not, load the content for that tab
+        const tabData = tabDataMap[tabNames[tabIndex]];
+        const contentFragment = loadTabData(tabNames[tabIndex], tabIndex, tabData);
+        
+        // Append the newly created contentFragment to the tabContentsContainer
+        tabContentsContainer.appendChild(contentFragment);
+    }
+}
+
+
+    function createTableElement(dataArray) {
+        const headers = getHeaders(dataArray[0]);
+        const table = document.createElement('table');
+        table.className = "ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400";
+        const allHeadersEmpty = headers.every(({ header }) => !header.trim());
+        if (!allHeadersEmpty) {
+            const thead = document.createElement('thead');
+            thead.className = "text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400";
+            const tr = document.createElement('tr');
+            headers.forEach(({ header, alignment, textColor, fontSize, columnWidth }) => {
+                const th = document.createElement('th');
+                th.scope = "col";
+                th.style.width = columnWidth;
+                th.className = `px-5 py-5 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-semibold ${textColor} uppercase align-middle`;
+                th.innerHTML = fontSize ? `<span style="font-size:${fontSize}px">${header}</span>` : header;
+                tr.appendChild(th);
+            });
+            thead.appendChild(tr);
+            table.appendChild(thead);
+        }
+        const tbody = document.createElement('tbody');
+        dataArray.forEach((row, index) => {
+            const rowElement = getRowElement(row, headers, '', index);
+            tbody.appendChild(rowElement);
+        });
+        table.appendChild(tbody);
+        return table;
+    }
+
+    function getHeaders(row) {
+        let headers = Object.keys(row).map(originalHeader => {
+            let alignment = 'text-center';
+            let header = originalHeader;
+            let textColor = 'text-white';
+            let fontSize = '';
+            if (header.includes('{C}')) {
+                alignment = 'text-center';
+                header = header.replace('{C}', '');
+            } else if (header.includes('{L}')) {
+                alignment = 'text-left';
+                header = header.replace('{L}', '');
+            } else if (header.includes('{R}')) {
+                alignment = 'text-right';
+                header = header.replace('{R}', '');
+            }
+            if (header.includes('{r}')) {
+                textColor = 'text-red-500';
+                header = header.replace('{r}', '');
+            } else if (header.includes('{g}')) {
+                textColor = 'text-green-500';
+                header = header.replace('{g}', '');
+            } else if (header.includes('{b}')) {
+                textColor = 'text-blue-500';
+                header = header.replace('{b}', '');
+            }
+            const fontSizeMatch = header.match(/{f(\d+)}/);
+            if (fontSizeMatch) {
+                fontSize = fontSizeMatch[1];
+                header = header.replace(fontSizeMatch[0], '');
+            }
+            header = header.split('_')[0];
+            return { header, alignment, originalHeader, textColor, fontSize };
+        });
+        return headers;
+    }
+
+    function getRowElement(row, headers, columnWidth, index) {
+        const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? '' : 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+        let skipCells = 0;
+        headers.forEach(({ originalHeader, alignment, textColor, fontSize }) => {
+            if (skipCells > 0) {
+                skipCells--;
+                return;
+            }
+            let cellValue = row[originalHeader];
+            let cellAlignment = alignment;
+            let cellTextColor = textColor === 'text-white' ? 'text-black' : textColor;
+            let cellColSpan = 1;
+            let cellFontSize = fontSize ? `font-size:${fontSize}px` : '';
+            if (cellValue && cellValue.includes('{C}')) {
+                cellAlignment = 'text-center';
+                cellValue = cellValue.replace('{C}', '');
+            } else if (cellValue && cellValue.includes('{L}')) {
+                cellAlignment = 'text-left';
+                cellValue = cellValue.replace('{L}', '');
+            } else if (cellValue && cellValue.includes('{R}')) {
+                cellAlignment = 'text-right';
+                cellValue = cellValue.replace('{R}', '');
+            }
+            if (cellValue && cellValue.includes('{r}')) {
+                cellTextColor = 'text-red-500';
+                cellValue = cellValue.replace('{r}', '');
+            } else if (cellValue && cellValue.includes('{g}')) {
+                cellTextColor = 'text-green-500';
+                cellValue = cellValue.replace('{g}', '');
+            } else if (cellValue && cellValue.includes('{b}')) {
+                cellTextColor = 'text-blue-500';
+                cellValue = cellValue.replace('{b}', '');
+            }
+            if (cellValue && cellValue.includes('{W}')) {
+                cellValue = cellValue.replace('{W}', '');
+                let nextHeaderIndex = headers.findIndex(({ originalHeader: oh }) => oh === originalHeader) + 1;
+                while (nextHeaderIndex < headers.length && (!row[headers[nextHeaderIndex].originalHeader] || row[headers[nextHeaderIndex].originalHeader] === '')) {
+                    cellColSpan++;
+                    skipCells++;
+                    nextHeaderIndex++;
+                }
+            }
+            const fontSizeMatch = cellValue.match(/{f(\d+)}/);
+            if (fontSizeMatch) {
+                cellFontSize = `font-size:${fontSizeMatch[1]}px`;
+                cellValue = cellValue.replace(fontSizeMatch[0], '');
+            }
+            const td = getCellElement(columnWidth, cellColSpan, cellValue, cellTextColor, cellAlignment, cellFontSize);
+            tr.appendChild(td);
+        });
+        return tr;
+    }
+
+    function getCellElement(columnWidth, cellColSpan, cellValue, cellTextColor, cellAlignment, fontSize) {
+        const td = document.createElement('td');
+        td.style.width = columnWidth;
+        td.colSpan = cellColSpan;
+        td.className = `px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle`;
+        if (fontSize) {
+            td.style.cssText += `; ${fontSize}`;
+        }
+        if (cellValue.includes('{B}')) {
+            let [buttonName, buttonURL] = cellValue.replace('{B}', '').split('>');
+            if (!buttonURL.startsWith('http://') && !buttonURL.startsWith('https://')) {
+                buttonURL = `https://${buttonURL}`;
+            }
+            const button = document.createElement('button');
+            button.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded';
+            button.onclick = () => window.open(buttonURL, '_blank');
+            button.innerHTML = buttonName;
+            td.appendChild(button);
+        } else {
+            td.innerHTML = cellValue;
+        }
+        return td;
+    }
+
+    function displayNoDataMessage(widgetElement) {
+        widgetElement.innerHTML = '<div class="flex justify-center items-center h-full text-gray-500 text-lg">No data available</div>';
+    }
+}
+
+window.addEventListener('load', function() {
+    Array.from(document.getElementsByClassName('ttmTabsWidget')).forEach((element, index) => {
+        ttmCreateGSTWidget(element, index, 'ttmTabsWidget');
+    });
+    Array.from(document.getElementsByClassName('ttmTableWidget')).forEach((element, index) => {
+        ttmCreateGSTWidget(element, index, 'ttmTableWidget');
+    });
+}, false);
