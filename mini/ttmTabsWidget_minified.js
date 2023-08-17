@@ -8,20 +8,20 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         displayNoDataMessage(widgetElement);
         return;
     }
-	const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
-	const GSheetData = await fetchGSheetData(GSheetURL);
+async function fetchGSheetData(GSheetURL) {
+  const response = await fetch(GSheetURL);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return await response.text();
+}
 
-	const parsedCSVData = await parseCSV(GSheetData);
+const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
+const GSheetData = await fetchGSheetData(GSheetURL);
 
-	const widgetType = 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, parsedCSVData) : initializeTable(widgetElement, widgetId, parsedCSVData);
+const parsedCSVData = await parseCSV(GSheetData);
 
-	async function fetchGSheetData(GSheetURL) {
-		const response = await fetch(GSheetURL);
- 	if (!response.ok) {
-    		throw new Error(`HTTP error! status: ${response.status}`);
-  	}
-  		return await response.text();
-	}
+const widgetType = 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, parsedCSVData) : initializeTable(widgetElement, widgetId, parsedCSVData);
 
     function parseCSV(data) {
         data = data.replace(/\r\n/g, '\n');
