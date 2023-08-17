@@ -17,7 +17,7 @@ async function fetchGSheetData(GSheetURL) {
 }
 
 const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
-const GSheetData = await fetchGSheetData(GSheetURL);
+let GSheetData = await fetchGSheetData(GSheetURL);
 
 const parsedCSVData = await parseCSV(GSheetData);
 
