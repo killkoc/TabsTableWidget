@@ -1,4 +1,4 @@
-function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
+async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     if (widgetElement.hasAttribute('ttmWidgetInit')) return;
     widgetElement.setAttribute('ttmWidgetInit', '');
     const widgetId = `${widgetType}-${widgetIndex}`;
@@ -8,24 +8,30 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         displayNoDataMessage(widgetElement);
         return;
     }
-    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
-    fetchGSheetData(GSheetURL)
-        .then(data => {
-            const GSheetData = parseCSV(data);
-            widgetType === 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, GSheetData) : initializeTable(widgetElement, widgetId, GSheetData);
-        })
-        .catch(error => {
-            console.error('Error fetching Google Sheet data:', error);
-            displayNoDataMessage(widgetElement);
-        });
 
-    async function fetchGSheetData(GSheetURL) {
-        const response = await fetch(GSheetURL);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
+    try {
+        const GSheetData = await fetchGSheetData(GSheetURL);
+        const parsedCSVData = await parseCSV(GSheetData);
+        if (widgetType === 'ttmTabsWidget') {
+            initializeTabs(widgetElement, widgetId, parsedCSVData);
+        } else {
+            initializeTable(widgetElement, widgetId, parsedCSVData);
         }
-        return await response.text();
+    } catch (error) {
+        console.error('Error fetching Google Sheet data:', error);
+        displayNoDataMessage(widgetElement);
     }
+}
+
+async function fetchGSheetData(GSheetURL) {
+    const response = await fetch(GSheetURL);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.text();
+}
+
 
     function parseCSV(data) {
         data = data.replace(/\r\n/g, '\n');
