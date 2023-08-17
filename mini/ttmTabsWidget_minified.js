@@ -8,20 +8,24 @@ function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         displayNoDataMessage(widgetElement);
         return;
     }
-async function fetchGSheetData(GSheetURL) {
-  const response = await fetch(GSheetURL);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return await response.text();
-}
+    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
+    fetchGSheetData(GSheetURL)
+        .then(data => {
+            const GSheetData = parseCSV(data);
+            widgetType === 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, GSheetData) : initializeTable(widgetElement, widgetId, GSheetData);
+        })
+        .catch(error => {
+            console.error('Error fetching Google Sheet data:', error);
+            displayNoDataMessage(widgetElement);
+        });
 
-const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
-let GSheetData = await fetchGSheetData(GSheetURL);
-
-const parsedCSVData = await parseCSV(GSheetData);
-
-const widgetType = 'ttmTabsWidget' ? initializeTabs(widgetElement, widgetId, parsedCSVData) : initializeTable(widgetElement, widgetId, parsedCSVData);
+    async function fetchGSheetData(GSheetURL) {
+        const response = await fetch(GSheetURL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.text();
+    }
 
     function parseCSV(data) {
         data = data.replace(/\r\n/g, '\n');
