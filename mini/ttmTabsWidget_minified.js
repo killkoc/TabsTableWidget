@@ -45,7 +45,8 @@ async function fetchGSheetData(GSheetURL) {
     }
 
 function initializeTabs(widgetElement, widgetId, GSheetData) {
-    if (widgetElement.children.length === 0) {
+console.log(widgetElement);
+	if (widgetElement.children.length === 0) {
         const structure = document.createElement('div');
         structure.className = "flex justify-center";
         structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
@@ -53,7 +54,9 @@ function initializeTabs(widgetElement, widgetId, GSheetData) {
     }
 
     const tabBar = widgetElement.querySelector('ul');
+console.log(tabBar);
     const categoryName = Object.keys(GSheetData[0])[0];
+console.log(categoryName);
 
     const tabDataMap = {};
     GSheetData.forEach(row => {
