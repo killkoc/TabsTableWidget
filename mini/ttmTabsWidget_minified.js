@@ -46,7 +46,9 @@ async function fetchGSheetData(GSheetURL) {
 
 function initializeTabs(widgetElement, widgetId, GSheetData) {
 console.log(widgetElement);
-	if (widgetElement.children.length === 0) {
+    // Remove all existing children of widgetElement
+    widgetElement.innerHTML = '';
+	if (widgetElement.children.length == 0) {
         const structure = document.createElement('div');
 console.log(structure);
         structure.className = "flex justify-center";
