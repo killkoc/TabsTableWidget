@@ -48,13 +48,12 @@ function initializeTabs(widgetElement, widgetId, GSheetData) {
 console.log(widgetElement);
     // Remove all existing children of widgetElement
     widgetElement.innerHTML = '';
-	if (widgetElement.children.length == 0) {
-        const structure = document.createElement('div');
+
+	const structure = document.createElement('div');
 console.log(structure);
         structure.className = "flex justify-center";
         structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
         widgetElement.appendChild(structure);
-    }
 
     const tabBar = widgetElement.querySelector('ul');
 console.log(tabBar);
@@ -111,12 +110,12 @@ function loadTabData(tab, index, filteredData) {
 }
 
     function initializeTable(widgetElement, widgetId, GSheetData) {
-        if (widgetElement.children.length === 0) {
+	widgetElement.innerHTML = '';
             const structure = document.createElement('div');
             structure.className = "flex justify-center";
             structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>';
             widgetElement.appendChild(structure);
-        }
+
         const tableContainer = widgetElement.querySelector('.widget-container');
         const tableElement = createTableElement(GSheetData);
         const divTableElement = document.createElement('div');
