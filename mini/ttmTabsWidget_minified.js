@@ -13,6 +13,10 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     try {
         const GSheetData = await fetchGSheetData(GSheetURL);
         const parsedCSVData = await parseCSV(GSheetData);
+	    
+        // Remove all existing children of widgetElement
+        widgetElement.innerHTML = '';
+
         if (widgetType === 'ttmTabsWidget') {
             initializeTabs(widgetElement, widgetId, parsedCSVData);
         } else {
@@ -45,20 +49,14 @@ async function fetchGSheetData(GSheetURL) {
     }
 
 function initializeTabs(widgetElement, widgetId, GSheetData) {
-console.log(widgetElement);
-    // Remove all existing children of widgetElement
-    widgetElement.innerHTML = '';
-
-	const structure = document.createElement('div');
-console.log(structure);
-        structure.className = "flex justify-center";
-        structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
-        widgetElement.appendChild(structure);
+    // Add Child Structure in preparation for tabs
+    const structure = document.createElement('div');
+    structure.className = "flex justify-center";
+    structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
+    widgetElement.appendChild(structure);
 
     const tabBar = widgetElement.querySelector('ul');
-console.log(tabBar);
     const categoryName = Object.keys(GSheetData[0])[0];
-console.log(categoryName);
 
     const tabDataMap = {};
     GSheetData.forEach(row => {
@@ -110,11 +108,11 @@ function loadTabData(tab, index, filteredData) {
 }
 
     function initializeTable(widgetElement, widgetId, GSheetData) {
-	widgetElement.innerHTML = '';
-            const structure = document.createElement('div');
-            structure.className = "flex justify-center";
-            structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>';
-            widgetElement.appendChild(structure);
+	// Add Child Structure in preparation for table    
+	const structure = document.createElement('div');
+	structure.className = "flex justify-center";
+	structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>';
+	widgetElement.appendChild(structure);
 
         const tableContainer = widgetElement.querySelector('.widget-container');
         const tableElement = createTableElement(GSheetData);
