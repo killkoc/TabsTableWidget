@@ -311,7 +311,7 @@ function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
         widgetElement.innerHTML = '<div class="flex justify-center items-center h-full text-gray-500 text-lg">No data available</div>';
     }
 
-window.addEventListener('load', function() {
+document.addEventListener('DOMContentLoaded', function() {
     Array.from(document.getElementsByClassName('ttmTabsWidget')).forEach((element, index) => {
         ttmCreateGSTWidget(element, index, 'ttmTabsWidget');
     });
