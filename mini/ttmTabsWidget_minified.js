@@ -48,6 +48,7 @@ function initializeTabs(widgetElement, widgetId, GSheetData) {
 console.log(widgetElement);
 	if (widgetElement.children.length === 0) {
         const structure = document.createElement('div');
+console.log(structure);
         structure.className = "flex justify-center";
         structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
         widgetElement.appendChild(structure);
