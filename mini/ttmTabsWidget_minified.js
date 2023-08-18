@@ -9,10 +9,11 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         return;
     }
 
+console.time(widgetId);
     const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
     try {
         const GSheetData = await fetchGSheetData(GSheetURL);
-        const parsedCSVData = await parseCSV(GSheetData);
+        const parsedCSVData = await parseCSV(GSheetData, widgetId);
 	    
         // Remove all existing children of widgetElement
         widgetElement.innerHTML = '';
@@ -37,7 +38,8 @@ async function fetchGSheetData(GSheetURL) {
 }
 
 
-    function parseCSV(data) {
+    function parseCSV(data, widgetId) {
+console.timeEnd(widgetId);
         data = data.replace(/\r\n/g, '\n');
         const [headerLine, ...rows] = data.split('\n');
         const originalHeaders = headerLine.split(',');
