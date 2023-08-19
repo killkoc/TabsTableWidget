@@ -9,7 +9,6 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         return;
     }
 
-console.time(widgetId);
     const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
     try {
         const GSheetData = await fetchGSheetData(GSheetURL);
@@ -39,7 +38,6 @@ async function fetchGSheetData(GSheetURL) {
 
 
     function parseCSV(data, widgetId) {
-console.timeEnd(widgetId);
         data = data.replace(/\r\n/g, '\n');
         const [headerLine, ...rows] = data.split('\n');
         const originalHeaders = headerLine.split(',');
@@ -128,7 +126,7 @@ function loadTabData(tab, index, filteredData) {
     function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
         tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-3 py-2 block leading-normal">${category}</div>`;
+        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-3 py-3 block leading-normal">${category}</div>`;
         return tabElement;
     }
 
