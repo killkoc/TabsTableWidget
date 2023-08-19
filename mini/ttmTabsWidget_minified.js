@@ -128,7 +128,7 @@ function loadTabData(tab, index, filteredData) {
     function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
         tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-3 py-3 block leading-normal">${category}</div>`;
+        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-2 py-2 block leading-normal">${category}</div>`;
         return tabElement;
     }
 
@@ -176,7 +176,7 @@ function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
                 const th = document.createElement('th');
                 th.scope = "col";
                 th.style.width = columnWidth;
-                th.className = `px-3 py-4 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-semibold ${textColor} uppercase align-middle`;
+                th.className = `px-2 py-3 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-semibold ${textColor} uppercase align-middle`;
                 th.innerHTML = fontSize ? `<span style="font-size:${fontSize}px">${header}</span>` : header;
                 tr.appendChild(th);
             });
@@ -287,7 +287,7 @@ function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
         const td = document.createElement('td');
         td.style.width = columnWidth;
         td.colSpan = cellColSpan;
-        td.className = `px-3 py-3 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle`;
+        td.className = `px-2 py-2 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle`;
         if (fontSize) {
             td.style.cssText += `; ${fontSize}`;
         }
@@ -297,7 +297,7 @@ function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
                 buttonURL = `https://${buttonURL}`;
             }
             const button = document.createElement('button');
-            button.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold  px-3 py-2 rounded';
+            button.className = 'bg-blue-500 hover:bg-blue-700 text-white font-bold  px-2 py-2 rounded';
             button.onclick = () => window.open(buttonURL, '_blank');
             button.innerHTML = buttonName;
             td.appendChild(button);
