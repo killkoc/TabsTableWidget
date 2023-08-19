@@ -162,7 +162,11 @@ function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
 
 
     function createTableElement(dataArray) {
-        const headers = getHeaders(dataArray[0]);
+	const headers = getHeaders(dataArray[0]);
+
+	const totalColumns = headers.length;
+	const columnWidth = `${Math.floor(100 / totalColumns)}%`;
+
         const table = document.createElement('table');
         table.className = "ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400";
         const allHeadersEmpty = headers.every(({ header }) => !header.trim());
