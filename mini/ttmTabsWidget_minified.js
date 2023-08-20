@@ -165,7 +165,7 @@ function initializeTabs(widgetElement, widgetId, GSheetData) {
 function createTab(widgetElement, widgetId, category, index) {
     const tabElement = document.createElement('li');
     tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-    tabElement.innerHTML = `<div class="text-xs font-semibold uppercase px-3 py-3 block leading-normal">${category}</div>`;
+    tabElement.innerHTML = `<div class="text-xs font-medium uppercase px-3 py-3 block leading-normal">${category}</div>`;
     return tabElement;
 }
 
