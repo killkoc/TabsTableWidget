@@ -26,13 +26,13 @@ The detailed breakdown of the code is as follows:
 
 - **switchTab**: Switches to a tab. It takes the DOM element representing the tab and the index of the tab as parameters.
 
-- **createTableHTML**: Generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table. When are headers are empty, no HTML is generated for the Table headers.
+- **createTableElement**: Generates the HTML for a table. It takes an array of data and a boolean indicating whether the header should be rounded as parameters and returns the HTML string for the table. When are headers are empty, no HTML is generated for the Table headers.
 
 - **getHeaders**: Maps the keys of a row to an array of header objects. It sets default values for the alignment and text color, and updates these values based on any alignment or color tags in the header. Also manages the {} tags in headers.
 
-- **getRowHTML**: Generates the HTML for a row in a table. It starts with an opening `<tr>` tag, adding a class for alternate rows, and generates the HTML for each cell in the row. Also manages most {} tags in cells.
+- **getRowElement**: Generates the HTML for a row in a table. It starts with an opening `<tr>` tag, adding a class for alternate rows, and generates the HTML for each cell in the row. Also manages most {} tags in cells.
 
-- **getCellHTML**: Generates the HTML for a cell in a table. It handles different cases based on the cell value and any tags in it. Also manages {B} tags in cells.
+- **getCellElement**: Generates the HTML for a cell in a table. It handles different cases based on the cell value and any tags in it. Also manages {B} tags in cells.
 
 - **displayNoDataMessage**: Displays a message indicating that no data could be found. It sets the container's content to an error message.
 
