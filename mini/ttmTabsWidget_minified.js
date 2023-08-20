@@ -268,7 +268,7 @@ function initializeTable(widgetElement, widgetId, GSheetData) {
     const tableContainer = widgetElement.querySelector('.widget-container');
     const tableElement = createTableElement(GSheetData);
     const divTableElement = document.createElement('div');
-    divTableElement.className = "relative overflow-x-auto shadow-sm sm:rounded-lg";
+    divTableElement.className = "relative overflow-x-auto shadow-sm sm:rounded-t-xl";
     divTableElement.appendChild(tableElement);
     tableContainer.appendChild(divTableElement);
     tableContainer.classList.add('table-content');
