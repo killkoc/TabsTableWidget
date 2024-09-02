@@ -1,458 +1,523 @@
 /**
- * This function creates a widget that fetches data from a Google Sheet and displays it in a tabbed layout.
+ * Initialize a Google Sheet-based widget.
  * 
- * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
- * @param {number} widgetIndex The index of the widget, used to generate a unique ID for the widget.
- * @param {string} widgetType The type of the widget, used to generate a unique ID for the widget.
+ * @param {Element} widgetElement - The HTML element to host the widget.
+ * @param {number} widgetIndex - The unique index of this widget instance.
+ * @param {string} widgetType - The type of widget to create ('ttmTabsWidget' or 'ttmTableWidget').
  */
-function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
-    // If the widget element already has the attribute 'ttmWidgetInit', we don't need to initialize it again.
+async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
+    // Prevent reinitialization of a widget
     if (widgetElement.hasAttribute('ttmWidgetInit')) return;
-
-    // We set the 'ttmWidgetInit' attribute to prevent the widget from being initialized multiple times.
+    
+    // Mark this widget as initialized
     widgetElement.setAttribute('ttmWidgetInit', '');
-
-    // We create a unique ID for the widget using the widgetType and widgetIndex parameters.
+    
+    // Generate a unique ID for this widget instance and assign it to the widgetElement
     const widgetId = `${widgetType}-${widgetIndex}`;
     widgetElement.id = widgetId;
     
-    // We get the Google Sheet ID from a data attribute in the element of the widget.
+    // Retrieve the Google Sheet ID from the widgetElement's data attributes
     const GSheetID = widgetElement.getAttribute('data-ttmGSID');
-
-    // If the data attribute is not set or is empty, we display a message indicating that no data could be found.
     if (!GSheetID) {
+        // Display a message when there's no data to be loaded
         displayNoDataMessage(widgetElement);
         return;
     }
 
-    // We construct the URL to fetch the Google Sheet data as CSV.
-    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
+    // Start a timer to measure how long the widget creation takes
+    console.time(widgetId);
 
-    // We fetch the Google Sheet data, parse it, and depending on the widgetType parameter, we initialize tabs or a table with the data.
-    fetchGSheetData(GSheetURL)
-        .then(data => {
-            const GSheetData = parseCSV(data);
-            widgetType === 'ttmTabsWidget' ? initializeTabs(widgetElement,widgetId, GSheetData) : initializeTable(widgetElement, widgetId, GSheetData);
-        })
-        .catch(error => {
-            console.error('Error fetching Google Sheet data:', error);
-            displayNoDataMessage(widgetElement);
-        });
+    // Generate the URL to access the Google Sheet in CSV format
+    const GSheetURL = GSheetID.startsWith('2PAX')
+        ? `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`
+        : `https://docs.google.com/spreadsheets/d/${GSheetID}/pub?output=csv`;
+    try {
+        // Fetch the Google Sheet data and parse the CSV
+        const GSheetData = await fetchGSheetData(GSheetURL);
+        const parsedCSVData = await parseCSV(GSheetData, widgetId);
+        
+        // Clear the widget element to prepare for the new content
+        widgetElement.innerHTML = '';
+        
+        // Create the widget, either as a set of tabs or as a table, depending on `widgetType`
+        if (widgetType === 'ttmTabsWidget') {
+            initializeTabs(widgetElement, widgetId, parsedCSVData);
+        } else {
+            initializeTable(widgetElement, widgetId, parsedCSVData);
+        }
+    } catch (error) {
+        // Log and display errors that occur while fetching or processing the Google Sheet data
+        console.error('Error fetching Google Sheet data:', error);
+        displayNoDataMessage(widgetElement);
+    }
+
 
     /**
-     * Fetches data from a Google Sheet.
+     * Fetch the contents of a Google Sheet as a CSV-formatted string.
      * 
-     * @param {string} GSheetURL The URL to the Google Sheet data.
-     * @returns {Promise<string>} A promise that resolves with the fetched data as a string.
+     * @param {string} GSheetURL - The URL to fetch the Google Sheet data from.
+     * @returns {Promise<string>} - A promise that resolves with the fetched CSV data.
+     * @throws Will throw an error if the fetch operation fails.
      */
     async function fetchGSheetData(GSheetURL) {
+        // Send a network request to fetch the data from the Google Sheet
         const response = await fetch(GSheetURL);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        // Parse and return the response text
         return await response.text();
     }
 
+
     /**
-     * Parses CSV data into an array of objects.
+     * Parse a CSV-formatted string into an array of objects.
      * 
-     * @param {string} data The CSV data.
-     * @returns {Object[]} An array of objects representing the CSV data.
+     * @param {string} data - The CSV data to parse.
+     * @param {string} widgetId - The ID of the widget, used for debugging.
+     * @returns {Array<Object>} - The parsed CSV data.
      */
-    function parseCSV(data) {
-        // Replace all occurrences of the carriage return and newline sequence with a newline.
+    function parseCSV(data, widgetId) {
+        // End the timer and log the time taken for performance debugging
+        console.timeEnd(widgetId);
+        
+        // Normalize newlines and split the CSV data into lines
         data = data.replace(/\r\n/g, '\n');
-        // Split the data into lines.
         const [headerLine, ...rows] = data.split('\n');
-        // Split the header line into individual headers.
+        
+        // Create unique header names by appending the column index
         const originalHeaders = headerLine.split(',');
-        // Create unique headers by appending an index to each original header.
         const uniqueHeaders = originalHeaders.map((header, index) => `${header}_${index}`);
-        // Map each row to an object with properties corresponding to the unique headers.
+        
+        // Map each row of the CSV data to an object using the unique header names as keys
         return rows.map(row => {
             const cells = row.split(',');
             return Object.fromEntries(uniqueHeaders.map((header, index) => [header, cells[index] || '']));
         });
     }
 
+
     /**
-     * Initializes the tabs in the widget.
+     * Initialize a tabbed widget with data from a Google Sheet.
      * 
-     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
-     * @param {string} widgetId The unique ID of the widget.
-     * @param {Object[]} GSheetData The parsed Google Sheet data.
-     * @returns {Set<string>} A set of unique tab names.
+     * @param {Element} widgetElement - The HTML element to host the widget.
+     * @param {string} widgetId - The ID of the widget.
+     * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
      */
     function initializeTabs(widgetElement, widgetId, GSheetData) {
-        // Check if child elements already exist
-        if (widgetElement.children.length === 0) {
-            // Insert the additional structure into the 'ttmTableWidget' div
-            widgetElement.innerHTML = `<div class="flex justify-center"><div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div></div>`;
-        }
-        
-        // Store references to the DOM elements that will be used multiple times.
-        const tabBar = widgetElement.querySelector(`ul`);
-        const tabContentsContainer = widgetElement.querySelector(`.widget-container`);
+        // Add child structure in preparation for tabs
+        const structure = document.createElement('div');
+        structure.className = "flex justify-center";
+        structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm my-6"><ul class="flex justify-around"></ul><div class="w-full widget-container"></div></div></div>';
+        widgetElement.appendChild(structure);
 
-        // Create document fragments to hold the new tabs and their contents.
-        const tabBarFragment = document.createDocumentFragment();
-        const tabContentsContainerFragment = document.createDocumentFragment();
-        // Create a set to keep track of the unique tabs.
-        const uniqueTabs = new Set();
-        let tabIndex = 0;
-        // Get the category name from the first key of the first row of data.
+        // Find the tab bar element and determine the category name for tabs
+        const tabBar = widgetElement.querySelector('ul');
         const categoryName = Object.keys(GSheetData[0])[0];
-        // For each row of data, create a tab for its category (if not already created).
+
+        // Create a map to store rows of data by category
+        const tabDataMap = {};
         GSheetData.forEach(row => {
             const category = row[categoryName];
-            if (!uniqueTabs.has(category)) {
-                uniqueTabs.add(category);
-                tabBarFragment.appendChild(createTab(widgetElement, widgetId, category, tabIndex));
-                tabIndex++;
+            if (!tabDataMap[category]) {
+                tabDataMap[category] = [];
             }
-        });
-        // For each unique tab, create a content section with the corresponding data.
-        Array.from(uniqueTabs).forEach((tab, index) => {
-            tabContentsContainerFragment.appendChild(loadTabData(tab, index, GSheetData, categoryName));
-        });
-        // Add the new tabs and their contents to the DOM.
-        tabBar.appendChild(tabBarFragment);
-        tabContentsContainer.appendChild(tabContentsContainerFragment);
-        // Automatically select the first tab.
-        tabBar.firstElementChild.click();
-
-        // Add event listener to the tab bar.
-        tabBar.addEventListener('click', (event) => {
-            // Check if the event target is a tab.
-            if (event.target && event.target.matches('.ttmTab-element')) {
-                // Get the index of the tab.
-                const tabIndex = Array.from(tabBar.children).indexOf(event.target);
-                // Switch to the tab.
-                switchTab(widgetElement, widgetId, tabIndex);
-            }
-        });
-
-        return uniqueTabs;
-    }
-
-    /**
-     * Loads the data for a tab.
-     * 
-     * @param {string} tab The name of the tab.
-     * @param {number} index The index of the tab.
-     * @param {Object[]} GSheetData The parsed Google Sheet data.
-     * @param {string} categoryName The name of the category for the tab.
-     * @returns {HTMLElement} A div element containing the data for the tab.
-     */
-    function loadTabData(tab, index, GSheetData, categoryName) {
-        // Filter the data for the current tab and remove the category column.
-        const filteredData = GSheetData.filter(row => row[categoryName] === tab).map(row => {
             const { [categoryName]: _, ...rest } = row;
-            return rest;
+            tabDataMap[category].push(rest);
         });
-        // Create HTML for the table.
-        const tableHTML = createTableHTML(filteredData, false);
-        // Create a container for the table and add the table to it.
-        const tableContainer = document.createElement('div');
-        tableContainer.innerHTML = tableHTML;
-        // Show the container if this is the first tab, otherwise hide it.
-        tableContainer.style.display = index === 0 ? 'block' : 'none';
-        // Add a class to the container to make it easier to select later.
-        tableContainer.classList.add('tab-content');
-        return tableContainer;
-    }
 
-    /**
-     * Initializes the table in the widget.
-     * 
-     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
-     * @param {string} widgetId The unique ID of the widget.
-     * @param {Object[]} GSheetData The parsed Google Sheet data.
-     */
-    function initializeTable(widgetElement, widgetId, GSheetData) {
-        
-        // Check if child elements already exist
-        if (widgetElement.children.length === 0) {
-            // Insert the additional structure into the 'ttmTableWidget' div
-            widgetElement.innerHTML = `<div class="flex justify-center"><div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div></div>`;
+        // Create and append tabs for each unique category
+        const uniqueTabs = Object.keys(tabDataMap);
+        const tabFragment = document.createDocumentFragment();
+        uniqueTabs.forEach((tab, index) => {
+            tabFragment.appendChild(createTab(widgetElement, widgetId, tab, index));
+        });
+        tabBar.appendChild(tabFragment);
+
+        // Add a click event listener to handle tab switching
+        tabBar.addEventListener('click', (event) => {
+            const target = event.target;
+            const tabElements = Array.from(tabBar.children);
+            const clickedTab = target.closest('.ttmTab-element');
+            if (clickedTab) {
+                const tabIndex = tabElements.indexOf(clickedTab);
+                switchTab(widgetElement, widgetId, tabIndex, tabDataMap);
+            }
+        });
+
+        // Automatically switch to the first tab, if it exists
+        if (tabBar.firstChild) {
+            switchTab(widgetElement, widgetId, 0, tabDataMap);
         }
-
-        // Query the DOM for the existing or newly createdtable container.
-        const tableContainer = widgetElement.querySelector(`.widget-container`);
-        // Create HTML for the table and add it to the container.
-        const tableHTML = createTableHTML(GSheetData, true);
-        tableContainer.innerHTML = tableHTML;
-        // Add a class to the container to make it easier to select later.
-        tableContainer.classList.add('table-content');
     }
 
+
     /**
-     * Creates a tab element.
+     * Create a new tab element for the tabbed widget.
      * 
-     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
-     * @param {string} widgetId The unique ID of the widget.
-     * @param {string} category The name of the category for the tab.
-     * @param {number} index The index of the tab.
-     * @returns {HTMLElement} A li element representing the tab.
+     * @param {Element} widgetElement - The HTML element to host the widget.
+     * @param {string} widgetId - The ID of the widget.
+     * @param {string} category - The name of the tab.
+     * @param {number} index - The index of the tab.
+     * @returns {Element} - The created tab element.
      */
     function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
         tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `<div class="text-xs font-bold uppercase px-5 py-3 block leading-normal">${category}</div>`;
-        tabElement.addEventListener('click', () => switchTab(widgetElement, widgetId, index));
+        tabElement.innerHTML = `<div class="text-xs font-semibold uppercase px-3 py-3 block leading-normal">${category}</div>`;
         return tabElement;
     }
 
+
     /**
-     * Switches to a tab.
+     * Switch to a specific tab in the tabbed widget.
      * 
-     * @param {HTMLElement} tabElement The DOM element representing the tab.
-     * @param {string} widgetId The unique ID of the widget.
-     * @param {number} tabIndex The index of the tab.
+     * @param {Element} widgetElement - The HTML element hosting the widget.
+     * @param {string} widgetId - The ID of the widget.
+     * @param {number} tabIndex - The index of the tab to switch to.
+     * @param {Object} tabDataMap - The map of tab data, keyed by tab name.
      */
-    function switchTab(widgetElement, widgetId, tabIndex) {
-        // Query the DOM for all tabs and their contents.
-        const tabElements = widgetElement.querySelectorAll(`ul li`);
-        const tabContents = widgetElement.querySelectorAll(`.widget-container .tab-content, #${widgetId} .widget-container .table-content`);
-        // Deselect all tabs and hide their contents.
-        Array.from(tabElements).forEach((element, i) => {
-            element.classList.remove('bg-blue-500');
-            tabContents[i].style.display = 'none';
-        });
-        // Select the clicked tab and show its content.
+    function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
+        const tabElements = widgetElement.querySelectorAll('ul li');
+        const tabContentsContainer = widgetElement.querySelector('.widget-container');
+        const tabNames = Object.keys(tabDataMap);
+        const existingTableContent = tabContentsContainer.querySelector(`[data-tab-name="${tabNames[tabIndex]}"]`);
+        
+        // Hide all existing tab contents
+        const allTableContents = tabContentsContainer.querySelectorAll('.table-content');
+        allTableContents.forEach(content => content.style.display = 'none');
+        
+        // Remove active class from all tabs
+        tabElements.forEach(tab => tab.classList.remove('bg-blue-500'));
+        
+        // Set the clicked tab to active
         tabElements[tabIndex].classList.add('bg-blue-500');
-        tabContents[tabIndex].style.display = 'block';
-    }
-
-    /**
-     * Creates the HTML for a table.
-     * 
-     * @param {Object[]} dataArray The data for the table.
-     * @param {boolean} roundedHeader Whether the table should have rounded headers.
-     * @returns {string} The HTML for the table.
-     */
-    function createTableHTML(dataArray, roundedHeader = true) {
-        // Get the headers for the table
-        const headers = getHeaders(dataArray[0]);
-
-        // Calculate the width of each column
-        const totalColumns = headers.length;
-        const columnWidth = `${Math.floor(100 / totalColumns)}%`;
-
-        // Check if all headers are empty
-        const allHeadersEmpty = headers.every(({ header }) => !header.trim());
-
-        // Generate the HTML for each header cell
-        const headerCells = headers.map(({ header, alignment, textColor, fontSize }) => {
-            let headerHTML = header;
-            if (fontSize) {
-                headerHTML = `<span style="font-size:${fontSize}px">${header}</span>`;
-            }
-            return `<th scope="col" style="width: ${columnWidth}" class="px-5 py-5 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-semibold ${textColor} uppercase align-middle">${headerHTML}</th>`;
-        }).join('');
-
-        // Generate the HTML for each row in the table
-        const rows = dataArray.map((row, index) => getRowHTML(row, headers, columnWidth, index)).join('');
-
-        // Construct the HTML string
-        let tableHTML = `<div class="relative overflow-x-auto shadow-sm ${roundedHeader ? 'sm:rounded-lg' : ''}"><table class="ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400">
-            ${allHeadersEmpty ? `<tr><td colspan="${totalColumns}" style="border-bottom: 1px solid #ccc;"></td></tr>` : `<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr>${headerCells}</tr></thead>`}
-            <tbody>${rows}</tbody></table></div>`;
-
-        // Remove all colspan="1" attributes from the tableHTML
-        tableHTML = tableHTML.replace(/colspan="1"\\s*/g, '');
-
-        return tableHTML;
-    }
-
-    /**
-     * Gets the headers for a table.
-     * 
-     * @param {Object} row A row of data.
-     * @returns {Object[]} An array of header objects.
-     */
-    function getHeaders(row) {
-        // Map the keys of the row to an array of header objects
-        let headers = Object.keys(row).map(originalHeader => {
-            // Set default values for the alignment and text color
-            let alignment = 'text-center';
-            let header = originalHeader;
-            let textColor = 'text-white'; // default text color for headers
-            let fontSize = '';
-
-            // Update the alignment and header based on any alignment tags in the header
-            if (header.includes('{C}')) {
-                alignment = 'text-center';
-                header = header.replace('{C}', '');
-            } else if (header.includes('{L}')) {
-                alignment = 'text-left';
-                header = header.replace('{L}', '');
-            } else if (header.includes('{R}')) {
-                alignment = 'text-right';
-                header = header.replace('{R}', '');
-            }
-
-            // Update the text color based on any color tags in the header
-            if (header.includes('{r}')) {
-                textColor = 'text-red-500';
-                header = header.replace('{r}', '');
-            } else if (header.includes('{g}')) {
-                textColor = 'text-green-500';
-                header = header.replace('{g}', '');
-            } else if (header.includes('{b}')) {
-                textColor = 'text-blue-500';
-                header = header.replace('{b}', '');
-            }
-
-            // Update the font size based on any font size tags in the header
-            const fontSizeMatch = header.match(/{f(\d+)}/);
-            if (fontSizeMatch) {
-                fontSize = fontSizeMatch[1];
-                header = header.replace(fontSizeMatch[0], '');
-            }
-
-            // Remove the index from the header name
-            header = header.split('_')[0];
-
-            return { header, alignment, originalHeader, textColor, fontSize };
-        });
-
-        return headers;
-    }
-
-    /**
-     * Gets the HTML for a row in a table.
-     * 
-     * @param {Object} row A row of data.
-     * @param {Object[]} headers An array of header objects.
-     * @param {string} columnWidth The width of each column.
-     * @param {number} index The index of the row.
-     * @returns {string} The HTML for the row.
-     */
-    function getRowHTML(row, headers, columnWidth, index) {
-        // Start the row with an opening <tr> tag, adding a class for alternate rows
-        let rowHtml = index % 2 === 0 ? '<tr>' : '<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">';
-        let skipCells = 0;
-
-        // Generate the HTML for each cell in the row
-        headers.forEach(({ originalHeader, alignment, textColor, fontSize }) => {
-            if (skipCells > 0) {
-                skipCells--;
-                return;
-            }
-
-            // Get the value for the cell and set default values for the alignment and text color
-            let cellValue = row[originalHeader];
-            let cellAlignment = alignment;
-            let cellTextColor = textColor === 'text-white' ? 'text-black' : textColor;
-            let cellColSpan = 1;
-            let cellFontSize = fontSize ? `style="font-size:${fontSize}px"` : '';
-
-            // Update the alignment and cell value based on any alignment tags in the cell value
-            if (cellValue && cellValue.includes('{C}')) {
-                cellAlignment = 'text-center';
-                cellValue = cellValue.replace('{C}', '');
-            } else if (cellValue && cellValue.includes('{L}')) {
-                cellAlignment = 'text-left';
-                cellValue = cellValue.replace('{L}', '');
-            } else if (cellValue && cellValue.includes('{R}')) {
-                cellAlignment = 'text-right';
-                cellValue = cellValue.replace('{R}', '');
-            }
-
-            // Update the text color based on any color tags in the cell value
-            if (cellValue && cellValue.includes('{r}')) {
-                cellTextColor = 'text-red-500';
-                cellValue = cellValue.replace('{r}', '');
-            } else if (cellValue && cellValue.includes('{g}')) {
-                cellTextColor = 'text-green-500';
-                cellValue = cellValue.replace('{g}', '');
-            } else if (cellValue && cellValue.includes('{b}')) {
-                cellTextColor = 'text-blue-500';
-                cellValue = cellValue.replace('{b}', '');
-            }
-
-            // Calculate the colspan and how many cells to skip based on any width tags in the cell value
-            if (cellValue && cellValue.includes('{W}')) {
-                cellValue = cellValue.replace('{W}', '');
-
-                let nextHeaderIndex = headers.findIndex(({ originalHeader: oh }) => oh === originalHeader) + 1;
-                while (nextHeaderIndex < headers.length && (!row[headers[nextHeaderIndex].originalHeader] || row[headers[nextHeaderIndex].originalHeader] === '')) {
-                    cellColSpan++;
-                    skipCells++;
-                    nextHeaderIndex++;
-                }
-            }
-
-            // Update the font size based on any font size tags in the cell value
-            const fontSizeMatch = cellValue.match(/{f(\d+)}/);
-            if (fontSizeMatch) {
-                fontSize = fontSizeMatch[1];
-                cellValue = cellValue.replace(fontSizeMatch[0], '');
-            }
-
-            // Add the cell to the row
-            rowHtml += getCellHTML(columnWidth, cellColSpan, cellValue, cellTextColor, cellAlignment, fontSize);
-        });
-
-        return rowHtml + '</tr>';
-    }
-
-    /**
-     * Generates the HTML for a cell in a table.
-     * 
-     * @param {string} columnWidth The width of the cell.
-     * @param {number} cellColSpan The colspan of the cell.
-     * @param {string} cellValue The value of the cell.
-     * @param {string} cellTextColor The text color of the cell.
-     * @param {string} cellAlignment The alignment of the cell.
-     * @param {string} fontSize The font size of the cell.
-     * @returns {string} The HTML for the cell.
-     */
-    function getCellHTML(columnWidth, cellColSpan, cellValue, cellTextColor, cellAlignment, fontSize) {
-        if (cellColSpan === 1 && cellValue === '') {
-            return `<td style="width: ${columnWidth}" class="px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle"></td>`;
-        } else if (cellValue !== '') {
-            if (cellValue.includes('{B}')) {
-                let [buttonName, buttonURL] = cellValue.replace('{B}', '').split('>');
-                if (!buttonURL.startsWith('http://') && !buttonURL.startsWith('https://')) {
-                    // Assuming your site uses the HTTPS protocol
-                    buttonURL = `https://${buttonURL}`;
-                }
-
-                return `<td style="width: ${columnWidth}; font-size: ${fontSize}px" colspan="${cellColSpan}" class="px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle">
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="window.open('${buttonURL}', '_blank')">${buttonName}</button></td>`;
-            } else {
-                return `<td style="width: ${columnWidth}; font-size: ${fontSize}px" colspan="${cellColSpan}" class="px-3 py-5 border-b border-gray-200 bg-white ${cellTextColor} ${cellAlignment} align-middle">${cellValue}</td>`;
-            }
+        
+        // Check if content for clicked tab is already loaded
+        if (existingTableContent) {
+            // If it's already loaded, just display it
+            existingTableContent.style.display = 'block';
+        } else {
+            // If not, load the content for that tab
+            const tabData = tabDataMap[tabNames[tabIndex]];
+            const contentFragment = loadTabData(tabNames[tabIndex], tabIndex, tabData);
+            
+            // Append the newly created contentFragment to the tabContentsContainer
+            tabContentsContainer.appendChild(contentFragment);
         }
     }
 
+
     /**
-     * Displays a message indicating that no data could be found.
+     * Load data for a specific tab.
      * 
-     * @param {HTMLElement} widgetElement The DOM element that will contain the widget.
+     * @param {string} tab - The name of the tab.
+     * @param {number} index - The index of the tab.
+     * @param {Array<Object>} filteredData - The data for this tab.
+     * @returns {DocumentFragment} - A fragment containing the loaded tab data.
+     */
+    function loadTabData(tab, index, filteredData) {
+        // Step 1: Create a table element from the filtered data
+        const tableElement = createTableElement(filteredData);
+
+        // Step 2: Create a new DocumentFragment to hold the content for this tab
+        const contentFragment = document.createDocumentFragment();
+
+        // Step 3: Create a 'div' element to serve as the container for the table
+        const tableContainer = document.createElement('div');
+        tableContainer.style.display = 'block';
+        tableContainer.classList.add('table-content');
+
+        // Use the tab name as a data attribute for easy identification of the table
+        tableContainer.dataset.tabName = tab;
+
+        // Step 4: Create a 'div' element to directly hold the table
+        const divTableElement = document.createElement('div');
+        divTableElement.className = "relative overflow-x-auto shadow-sm";
+
+        // Step 5: Append the table element to divTableElement
+        divTableElement.appendChild(tableElement);
+
+        // Step 6: Append divTableElement to tableContainer
+        tableContainer.appendChild(divTableElement);
+
+        // Step 7: Append tableContainer to the DocumentFragment
+        contentFragment.appendChild(tableContainer);
+
+        // Step 8: Return the DocumentFragment, now containing the tab's content
+        return contentFragment;
+    }
+
+
+    /**
+     * Initialize a table widget with data from a Google Sheet.
+     * 
+     * @param {Element} widgetElement - The HTML element to host the widget.
+     * @param {string} widgetId - The ID of the widget.
+     * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
+     */
+    function initializeTable(widgetElement, widgetId, GSheetData) {
+        // Add child structure in preparation for table
+        const structure = document.createElement('div');
+        structure.className = "flex justify-center";
+        structure.innerHTML = '<div class="w-full"><div class="bg-transparent shadow-sm rounded-sm my-6"><div class="w-full widget-container"></div></div></div>';
+        widgetElement.appendChild(structure);
+
+        // Find the table container and create the table element
+        const tableContainer = widgetElement.querySelector('.widget-container');
+        const tableElement = createTableElement(GSheetData);
+        const divTableElement = document.createElement('div');
+        divTableElement.className = "relative overflow-x-auto shadow-sm sm:rounded-lg";
+        divTableElement.appendChild(tableElement);
+        tableContainer.appendChild(divTableElement);
+        tableContainer.classList.add('table-content');
+    }
+
+
+    /**
+     * Create an HTML table element from an array of data objects.
+     * 
+     * @param {Array<Object>} dataArray - The data to create the table from.
+     * @returns {Element} - The created table element.
+     */
+    function createTableElement(dataArray) {
+        // Get the headers for the table
+        const headers = getHeaders(dataArray[0]);
+
+        const table = document.createElement('table'); // Create a new table element
+        table.className = "ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400"; // Set the CSS class for the table
+        
+        const allHeadersEmpty = headers.every(({ header }) => !header.trim()); // Check if all header names are empty strings
+        if (!allHeadersEmpty) { // If not all headers are empty, create and append header row
+            const thead = document.createElement('thead'); // Create a new table header element
+            thead.className = "text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"; // Set the CSS class for the table header
+            const tr = document.createElement('tr'); // Create a new table row element for the header
+            headers.forEach(({ header, alignment, textColor, fontSize}) => {
+                const th = document.createElement('th'); // Create a new table header cell element
+
+                th.className = `px-2 py-3 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-medium ${textColor} uppercase align-middle`; // Set the CSS class for the header cell
+                th.innerHTML = fontSize ? `<span style="font-size:${fontSize}px">${header}</span>` : header; // Set the content of the header cell, potentially with a specific font size
+                tr.appendChild(th); // Append the header cell to the header row
+            });
+            thead.appendChild(tr); // Append the header row to the table header
+            table.appendChild(thead); // Append the table header to the table
+        }
+        
+        const tbody = document.createElement('tbody'); // Create a new table body element
+        dataArray.forEach((row, index) => {
+            const rowElement = getRowElement(row, headers, index); // Create a row element from the data object
+            tbody.appendChild(rowElement); // Append the row element to the table body
+        });
+        table.appendChild(tbody); // Append the table body to the table
+        
+        return table; // Return the fully constructed table element
+    }
+
+
+    /**
+     * Extract the headers from a data row object, and apply formatting options based on special codes in the header names.
+     * 
+     * @param {Object} row - A data row object.
+     * @returns {Array<Object>} - An array of header objects.
+     */
+    function getHeaders(row) {
+        // Map the keys of the input row object to an array of header objects
+        let headers = Object.keys(row).map(originalHeader => {
+            let alignment = 'text-center'; // Initialize alignment to 'text-center'
+            let header = originalHeader;   // Initialize header with the name of the property in the row object
+            let textColor = 'text-white';  // Initialize text color to 'text-white'
+            let fontSize = '';             // Initialize font size to an empty string
+            
+            // Check for alignment codes in the header and set the alignment accordingly
+            if (header.includes('{C}')) {
+                alignment = 'text-center';
+                header = header.replace('{C}', ''); // Remove the alignment code from the header
+            } else if (header.includes('{L}')) {
+                alignment = 'text-left';
+                header = header.replace('{L}', ''); // Remove the alignment code from the header
+            } else if (header.includes('{R}')) {
+                alignment = 'text-right';
+                header = header.replace('{R}', ''); // Remove the alignment code from the header
+            }
+            
+            // Check for color codes in the header and set the text color accordingly
+            if (header.includes('{r}')) {
+                textColor = 'text-red-500';
+                header = header.replace('{r}', ''); // Remove the color code from the header
+            } else if (header.includes('{g}')) {
+                textColor = 'text-green-500';
+                header = header.replace('{g}', ''); // Remove the color code from the header
+            } else if (header.includes('{b}')) {
+                textColor = 'text-blue-500';
+                header = header.replace('{b}', ''); // Remove the color code from the header
+            }
+            
+            // Check for font size codes in the header and set the font size accordingly
+            const fontSizeMatch = header.match(/{f(\d+)}/);
+            if (fontSizeMatch) {
+                fontSize = fontSizeMatch[1]; 					// Set the font size to the matched value
+                header = header.replace(fontSizeMatch[0], '');	// Remove the font size code from the header
+            }
+            
+            header = header.split('_')[0]; // Split the header at underscore and take the first part
+            
+            return { header, alignment, originalHeader, textColor, fontSize }; // Return the header object
+        });
+        
+        return headers; // Return the array of header objects
+    }
+
+
+    /**
+     * Create an HTML row element from a data row object.
+     * 
+     * @param {Object} row - A data row object.
+     * @param {Array<Object>} headers - An array of header objects.
+     * @param {number} index - The index of the row.
+     * @returns {Element} - The created row element.
+     */
+    function getRowElement(row, headers, index) {
+        const tr = document.createElement('tr'); // Create a new table row element
+        
+        tr.className = index % 2 === 0 ? '' : 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'; // Apply alternating row styles based on the index of the row
+        
+        let skipCells = 0; // Initialize skipCells to determine if the current cell should be skipped due to colspan
+        
+        headers.forEach(({ originalHeader, alignment, textColor, fontSize }) => { // Iterate through each header
+            if (skipCells > 0) { // Check if cells should be skipped due to colspan
+                skipCells--; // Decrease skipCells by 1
+                return; // Skip the current iteration
+            }
+
+            let cellValue = row[originalHeader]; // Get the value of the cell from the row data
+            let cellAlignment = alignment; // Set cell text alignment
+            let cellTextColor = textColor === 'text-white' ? 'text-black' : textColor; // Set cell text color
+            let cellColSpan = 1; // Initialize cellColSpan to 1
+            let cellFontCss = fontSize ? `font-size:${fontSize}px` : ''; // Set cell font size if specified
+            
+            if (cellValue && cellValue.includes('{C}')) { // Check for center alignment in cell value
+                cellAlignment = 'text-center';
+                cellValue = cellValue.replace('{C}', ''); // Remove alignment tag from cell value
+            } else if (cellValue && cellValue.includes('{L}')) { // Check for left alignment in cell value
+                cellAlignment = 'text-left';
+                cellValue = cellValue.replace('{L}', ''); // Remove alignment tag from cell value
+            } else if (cellValue && cellValue.includes('{R}')) { // Check for right alignment in cell value
+                cellAlignment = 'text-right';
+                cellValue = cellValue.replace('{R}', ''); // Remove alignment tag from cell value
+            }
+            
+            if (cellValue && cellValue.includes('{r}')) { // Check for red text in cell value
+                cellTextColor = 'text-red-500';
+                cellValue = cellValue.replace('{r}', ''); // Remove color tag from cell value
+            }
+            if (cellValue && cellValue.includes('{g}')) { // Check for green text in cell value
+                cellTextColor = 'text-green-500';
+                cellValue = cellValue.replace('{g}', ''); // Remove color tag from cell value
+            }
+            if (cellValue && cellValue.includes('{b}')) { // Check for blue text in cell value
+                cellTextColor = 'text-blue-500';
+                cellValue = cellValue.replace('{b}', ''); // Remove color tag from cell value
+            }
+            
+            if (cellValue && cellValue.includes('{W}')) { // Check for colspan in cell value
+                cellValue = cellValue.replace('{W}', ''); // Remove colspan tag from cell value
+                let nextHeaderIndex = headers.findIndex(({ originalHeader: oh }) => oh === originalHeader) + 1; // Find the next header index
+                while (nextHeaderIndex < headers.length && (!row[headers[nextHeaderIndex].originalHeader] || row[headers[nextHeaderIndex].originalHeader] === '')) { // Check for empty adjacent cells
+                    cellColSpan++; // Increase colspan
+                    skipCells++; // Increase skipCells
+                    nextHeaderIndex++; // Move to the next header index
+                }
+            }
+            
+            const fontSizeMatch = cellValue.match(/{f(\d+)}/);
+            if (fontSizeMatch) { // Check for font size in cell value
+                cellFontCss = `font-size:${fontSizeMatch[1]}px`; // Set the font size for the cell
+                cellValue = cellValue.replace(fontSizeMatch[0], ''); // Remove font size tag from cell value
+            }
+            
+            const td = getCellElement(cellColSpan, cellValue, cellTextColor, cellAlignment, cellFontCss); // Create the cell element with the extracted and computed properties
+            
+            tr.appendChild(td); // Append the cell to the row
+        });
+
+        return tr; // Return the fully constructed row element
+    }
+
+
+    /**
+     * Create an HTML cell element for a table row.
+     * 
+     * @param {number} cellColSpan - The colspan attribute for the cell.
+     * @param {string} cellValue - The text content of the cell.
+     * @param {string} cellTextColor - The text color for the cell.
+     * @param {string} cellAlignment - The text alignment for the cell.
+     * @param {string} fontCss - The font css/size for the cell.
+     * @returns {Element} - The created cell element.
+     */
+    function getCellElement(cellColSpan, cellValue, cellTextColor, cellAlignment, fontCss) {
+        const td = document.createElement('td'); // Create a new table cell element
+        
+        // td.style.width = columnWidth; // Set the width attribute for the cell
+        td.colSpan = cellColSpan; // Set the colspan attribute for the cell
+        
+        td.className = `px-2 py-2 border-b border-gray-200 bg-white font-normal ${cellTextColor} ${cellAlignment} align-middle`; // Set the CSS class for the cell, based on computed color and alignment
+        
+        if (fontCss) { // Check if a specific font size is specified
+            td.style.cssText += `; ${fontCss}`; // Apply the computed font size
+        }
+        
+        if (cellValue.includes('{B}')) { // Check if cell content should be rendered as a button
+            let [buttonName, buttonURL] = cellValue.replace('{B}', '').split('>'); // Extract button name and URL
+            if (!buttonURL.startsWith('http://') && !buttonURL.startsWith('https://')) { // Validate URL protocol
+                buttonURL = `https://${buttonURL}`; // Add https protocol if missing
+            }
+            const button = document.createElement('button'); // Create a new button element
+            
+            button.className = 'bg-blue-500 hover:bg-blue-700 text-white font-medium py-1 px-2 rounded'; // Set the CSS class for the button
+            
+            button.onclick = () => window.open(buttonURL, '_blank'); // Set the click event handler for the button
+            
+            button.innerHTML = buttonName; // Set the text content of the button
+            
+            td.appendChild(button); // Append the button to the cell
+        } else {
+            td.innerHTML = cellValue; // Set the text content of the cell
+        }
+        
+        return td; // Return the fully constructed cell element
+    }
+
+
+    /**
+     * Display a message indicating that no data is available for the widget.
+     * 
+     * @param {Element} widgetElement - The HTML element that was supposed to host the widget.
      */
     function displayNoDataMessage(widgetElement) {
-        // Query the DOM for the widget container.
-        const widgetContainer = widgetElement.querySelector(`.widget-container`);
-        // Set the container's content to an error message.
-        widgetContainer.innerHTML = `<div style="width: 100%; height: 200px; background-color: lightgray; display: flex; justify-content: center; align-items: center;">
-            <p>Google Sheet not found! Add a Data Attribute named data-ttmGSID whose value is the published ID of the Google Sheet you want to access</p></div>`;
-        // Log an error message to the console.
-        console.error('Google Sheet not found! Add a Data Attribute named data-ttmGSID whose value is the published ID of the Google Sheet you want to access');
+        // Set the inner HTML of the widget element to show a 'No data available' message
+        widgetElement.innerHTML = '<div class="flex justify-center items-center h-full text-gray-500 text-lg">No data available</div>';
     }
 }
 
-/**
- * When the document is loaded
- * Initialize all widgets of type 'ttmTabsWidget' and 'ttmTableWidget'.
- */
-document.addEventListener('DOMContentLoaded', function() {
+
+function ttmInitializeWidgets() {
+    // Initialize 'ttmTabsWidget' elements
     Array.from(document.getElementsByClassName('ttmTabsWidget')).forEach((element, index) => {
         ttmCreateGSTWidget(element, index, 'ttmTabsWidget');
     });
+    
+    // Initialize 'ttmTableWidget' elements
     Array.from(document.getElementsByClassName('ttmTableWidget')).forEach((element, index) => {
         ttmCreateGSTWidget(element, index, 'ttmTableWidget');
     });
-}, false);
+}
+
+
+if (document.readyState === 'loading') {
+    // If the document is still loading, listen for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', ttmInitializeWidgets);
+} else {
+    // If DOMContentLoaded has already fired, run the function immediately
+    ttmInitializeWidgets();
+}
