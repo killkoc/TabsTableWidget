@@ -28,8 +28,9 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     console.time(widgetId);
 
     // Generate the URL to access the Google Sheet in CSV format
-    const GSheetURL = `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`;
-    
+    const GSheetURL = GSheetID.startsWith('2PAX')
+        ? `https://docs.google.com/spreadsheets/d/e/${GSheetID}/pub?output=csv`
+        : `https://docs.google.com/spreadsheets/d/${GSheetID}/pub?output=csv`;
     try {
         // Fetch the Google Sheet data and parse the CSV
         const GSheetData = await fetchGSheetData(GSheetURL);
