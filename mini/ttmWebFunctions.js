@@ -49,3 +49,5 @@ function ttmGymButtonClicked(event) {
 		event.currentTarget.href = targetSite + '/' + pathArray[1];
 	}
 }
+
+var totemLocation = 'undefined';
