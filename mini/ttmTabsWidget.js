@@ -16,6 +16,9 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     const widgetId = `${widgetType}-${widgetIndex}`;
     widgetElement.id = widgetId;
     
+    // Clear the widgetElement's content to remove the placeholder
+    widgetElement.innerHTML = '';
+    
     // Create a wrapper div with the unique class 'ttm-widget-wrapper' to scope Tailwind styles
     const wrapper = document.createElement('div');
     wrapper.className = 'ttm-widget-wrapper';
