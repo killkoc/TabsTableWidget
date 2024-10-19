@@ -16,21 +16,11 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     const widgetId = `${widgetType}-${widgetIndex}`;
     widgetElement.id = widgetId;
     
-    // Clear the widgetElement's content to remove the placeholder
-    widgetElement.innerHTML = '';
-    
-    // Create a wrapper div with the unique class 'ttm-widget-wrapper' to scope Tailwind styles
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ttm-widget-wrapper';
-    
-    // Append the wrapper to the widgetElement
-    widgetElement.appendChild(wrapper);
-    
     // Retrieve the Google Sheet ID from the widgetElement's data attributes
     const GSheetID = widgetElement.getAttribute('data-ttmGSID');
     if (!GSheetID) {
         // Display a message when there's no data to be loaded
-        displayNoDataMessage(wrapper); // Pass the wrapper instead of widgetElement
+        displayNoDataMessage(widgetElement);
         return;
     }
 
@@ -46,19 +36,19 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         const GSheetData = await fetchGSheetData(GSheetURL);
         const parsedCSVData = await parseCSV(GSheetData, widgetId);
         
-        // Clear the wrapper element to prepare for the new content
-        wrapper.innerHTML = '';
+        // Clear the widget element to prepare for the new content
+        widgetElement.innerHTML = '';
         
         // Create the widget, either as a set of tabs or as a table, depending on `widgetType`
         if (widgetType === 'ttmTabsWidget') {
-            initializeTabs(wrapper, widgetId, parsedCSVData);
+            initializeTabs(widgetElement, widgetId, parsedCSVData);
         } else {
-            initializeTable(wrapper, widgetId, parsedCSVData);
+            initializeTable(widgetElement, widgetId, parsedCSVData);
         }
     } catch (error) {
         // Log and display errors that occur while fetching or processing the Google Sheet data
         console.error('Error fetching Google Sheet data:', error);
-        displayNoDataMessage(wrapper); // Pass the wrapper instead of widgetElement
+        displayNoDataMessage(widgetElement);
     }
 
 
@@ -111,25 +101,19 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Initialize a tabbed widget with data from a Google Sheet.
      * 
-     * @param {Element} wrapper - The wrapper element to host the widget content.
+     * @param {Element} widgetElement - The HTML element to host the widget.
      * @param {string} widgetId - The ID of the widget.
      * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
      */
-    function initializeTabs(wrapper, widgetId, GSheetData) {
+    function initializeTabs(widgetElement, widgetId, GSheetData) {
         // Add child structure in preparation for tabs
         const structure = document.createElement('div');
-        structure.className = "flex justify-center";
-        structure.innerHTML = `
-            <div class="w-full">
-                <div class="bg-transparent shadow-sm my-6">
-                    <ul class="flex justify-around"></ul>
-                    <div class="w-full widget-container"></div>
-                </div>
-            </div>`;
-        wrapper.appendChild(structure);
+        structure.className = "ttmTW-flex ttmTW-justify-center";
+        structure.innerHTML = '<div class="ttmTW-w-full"><div class="ttmTW-bg-transparent ttmTW-shadow-sm ttmTW-my-6"><ul class="ttmTW-flex ttmTW-justify-around"></ul><div class="ttmTW-w-full widget-container"></div></div></div>';
+        widgetElement.appendChild(structure);
 
         // Find the tab bar element and determine the category name for tabs
-        const tabBar = wrapper.querySelector('ul');
+        const tabBar = widgetElement.querySelector('ul');
         const categoryName = Object.keys(GSheetData[0])[0];
 
         // Create a map to store rows of data by category
@@ -147,7 +131,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         const uniqueTabs = Object.keys(tabDataMap);
         const tabFragment = document.createDocumentFragment();
         uniqueTabs.forEach((tab, index) => {
-            tabFragment.appendChild(createTab(wrapper, widgetId, tab, index));
+            tabFragment.appendChild(createTab(widgetElement, widgetId, tab, index));
         });
         tabBar.appendChild(tabFragment);
 
@@ -158,13 +142,13 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
             const clickedTab = target.closest('.ttmTab-element');
             if (clickedTab) {
                 const tabIndex = tabElements.indexOf(clickedTab);
-                switchTab(wrapper, widgetId, tabIndex, tabDataMap);
+                switchTab(widgetElement, widgetId, tabIndex, tabDataMap);
             }
         });
 
         // Automatically switch to the first tab, if it exists
         if (tabBar.firstChild) {
-            switchTab(wrapper, widgetId, 0, tabDataMap);
+            switchTab(widgetElement, widgetId, 0, tabDataMap);
         }
     }
 
@@ -172,17 +156,16 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Create a new tab element for the tabbed widget.
      * 
-     * @param {Element} wrapper - The wrapper element.
+     * @param {Element} widgetElement - The HTML element to host the widget.
      * @param {string} widgetId - The ID of the widget.
      * @param {string} category - The name of the tab.
      * @param {number} index - The index of the tab.
      * @returns {Element} - The created tab element.
      */
-    function createTab(wrapper, widgetId, category, index) {
+    function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
-        tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `
-            <div class="text-xs font-semibold uppercase px-3 py-3 block leading-normal">${category}</div>`;
+        tabElement.className = 'ttmTW-flex-auto ttmTW-ml-0 last:ttmTW-mr-0 ttmTW-text-center ttmTW-bg-gray-400 ttmTW-text-white ttmTW-rounded-t-xl ttmTab-element';
+        tabElement.innerHTML = `<div class="ttmTW-text-xs ttmTW-font-semibold ttmTW-uppercase ttmTW-px-3 ttmTW-py-3 ttmTW-block ttmTW-leading-normal">${category}</div>`;
         return tabElement;
     }
 
@@ -190,15 +173,14 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Switch to a specific tab in the tabbed widget.
      * 
-     * @param {Element} wrapper - The wrapper element hosting the widget content.
+     * @param {Element} widgetElement - The HTML element hosting the widget.
      * @param {string} widgetId - The ID of the widget.
      * @param {number} tabIndex - The index of the tab to switch to.
      * @param {Object} tabDataMap - The map of tab data, keyed by tab name.
      */
-    function switchTab(wrapper, widgetId, tabIndex, tabDataMap) {
-        const tabBar = wrapper.querySelector('ul');
-        const tabElements = tabBar.children;
-        const tabContentsContainer = wrapper.querySelector('.widget-container');
+    function switchTab(widgetElement, widgetId, tabIndex, tabDataMap) {
+        const tabElements = widgetElement.querySelectorAll('ul li');
+        const tabContentsContainer = widgetElement.querySelector('.widget-container');
         const tabNames = Object.keys(tabDataMap);
         const existingTableContent = tabContentsContainer.querySelector(`[data-tab-name="${tabNames[tabIndex]}"]`);
         
@@ -207,10 +189,10 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         allTableContents.forEach(content => content.style.display = 'none');
         
         // Remove active class from all tabs
-        Array.from(tabElements).forEach(tab => tab.classList.remove('bg-blue-500'));
+        tabElements.forEach(tab => tab.classList.remove('ttmTW-bg-blue-500'));
         
         // Set the clicked tab to active
-        tabElements[tabIndex].classList.add('bg-blue-500');
+        tabElements[tabIndex].classList.add('ttmTW-bg-blue-500');
         
         // Check if content for clicked tab is already loaded
         if (existingTableContent) {
@@ -252,7 +234,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 
         // Step 4: Create a 'div' element to directly hold the table
         const divTableElement = document.createElement('div');
-        divTableElement.className = "relative overflow-x-auto shadow-sm";
+        divTableElement.className = "ttmTW-relative ttmTW-overflow-x-auto ttmTW-shadow-sm";
 
         // Step 5: Append the table element to divTableElement
         divTableElement.appendChild(tableElement);
@@ -271,27 +253,22 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Initialize a table widget with data from a Google Sheet.
      * 
-     * @param {Element} wrapper - The wrapper element to host the widget content.
+     * @param {Element} widgetElement - The HTML element to host the widget.
      * @param {string} widgetId - The ID of the widget.
      * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
      */
-    function initializeTable(wrapper, widgetId, GSheetData) {
+    function initializeTable(widgetElement, widgetId, GSheetData) {
         // Add child structure in preparation for table
         const structure = document.createElement('div');
-        structure.className = "flex justify-center";
-        structure.innerHTML = `
-            <div class="w-full">
-                <div class="bg-transparent shadow-sm rounded-sm my-6">
-                    <div class="w-full widget-container"></div>
-                </div>
-            </div>`;
-        wrapper.appendChild(structure);
+        structure.className = "ttmTW-flex ttmTW-justify-center";
+        structure.innerHTML = '<div class="ttmTW-w-full"><div class="ttmTW-bg-transparent ttmTW-shadow-sm ttmTW-rounded-sm ttmTW-my-6"><div class="ttmTW-w-full widget-container"></div></div></div>';
+        widgetElement.appendChild(structure);
 
         // Find the table container and create the table element
-        const tableContainer = wrapper.querySelector('.widget-container');
+        const tableContainer = widgetElement.querySelector('.widget-container');
         const tableElement = createTableElement(GSheetData);
         const divTableElement = document.createElement('div');
-        divTableElement.className = "relative overflow-x-auto shadow-sm sm:rounded-lg";
+        divTableElement.className = "ttmTW-relative ttmTW-overflow-x-auto ttmTW-shadow-sm sm:ttmTW-rounded-lg";
         divTableElement.appendChild(tableElement);
         tableContainer.appendChild(divTableElement);
         tableContainer.classList.add('table-content');
@@ -309,17 +286,17 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         const headers = getHeaders(dataArray[0]);
 
         const table = document.createElement('table'); // Create a new table element
-        table.className = "ttmTable-content w-full text-xs text-left text-gray-500 dark:text-gray-400"; // Set the CSS class for the table
+        table.className = "ttmTable-content ttmTW-w-full ttmTW-text-xs ttmTW-text-left ttmTW-text-gray-500 dark:ttmTW-text-gray-400"; // Set the CSS class for the table
         
         const allHeadersEmpty = headers.every(({ header }) => !header.trim()); // Check if all header names are empty strings
         if (!allHeadersEmpty) { // If not all headers are empty, create and append header row
             const thead = document.createElement('thead'); // Create a new table header element
-            thead.className = "text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"; // Set the CSS class for the table header
+            thead.className = "ttmTW-text-xs ttmTW-text-gray-700 ttmTW-uppercase ttmTW-bg-gray-50 dark:ttmTW-bg-gray-700 dark:ttmTW-text-gray-400"; // Set the CSS class for the table header
             const tr = document.createElement('tr'); // Create a new table row element for the header
             headers.forEach(({ header, alignment, textColor, fontSize}) => {
                 const th = document.createElement('th'); // Create a new table header cell element
 
-                th.className = `px-2 py-3 border-b-2 border-gray-200 bg-blue-500 ${alignment} font-medium ${textColor} uppercase align-middle`; // Set the CSS class for the header cell
+                th.className = `ttmTW-px-2 ttmTW-py-3 ttmTW-border-b-2 ttmTW-border-gray-200 ttmTW-bg-blue-500 ${alignment} ttmTW-font-medium ${textColor} ttmTW-uppercase ttmTW-align-middle`; // Set the CSS class for the header cell
                 th.innerHTML = fontSize ? `<span style="font-size:${fontSize}px">${header}</span>` : header; // Set the content of the header cell, potentially with a specific font size
                 tr.appendChild(th); // Append the header cell to the header row
             });
@@ -347,40 +324,40 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     function getHeaders(row) {
         // Map the keys of the input row object to an array of header objects
         let headers = Object.keys(row).map(originalHeader => {
-            let alignment = 'text-center'; // Initialize alignment to 'text-center'
+            let alignment = 'ttmTW-text-center'; // Initialize alignment to 'text-center'
             let header = originalHeader;   // Initialize header with the name of the property in the row object
-            let textColor = 'text-white';  // Initialize text color to 'text-white'
+            let textColor = 'ttmTW-text-white';  // Initialize text color to 'text-white'
             let fontSize = '';             // Initialize font size to an empty string
             
             // Check for alignment codes in the header and set the alignment accordingly
             if (header.includes('{C}')) {
-                alignment = 'text-center';
+                alignment = 'ttmTW-text-center';
                 header = header.replace('{C}', ''); // Remove the alignment code from the header
             } else if (header.includes('{L}')) {
-                alignment = 'text-left';
+                alignment = 'ttmTW-text-left';
                 header = header.replace('{L}', ''); // Remove the alignment code from the header
             } else if (header.includes('{R}')) {
-                alignment = 'text-right';
+                alignment = 'ttmTW-text-right';
                 header = header.replace('{R}', ''); // Remove the alignment code from the header
             }
             
             // Check for color codes in the header and set the text color accordingly
             if (header.includes('{r}')) {
-                textColor = 'text-red-500';
+                textColor = 'ttmTW-text-red-500';
                 header = header.replace('{r}', ''); // Remove the color code from the header
             } else if (header.includes('{g}')) {
-                textColor = 'text-green-500';
+                textColor = 'ttmTW-text-green-500';
                 header = header.replace('{g}', ''); // Remove the color code from the header
             } else if (header.includes('{b}')) {
-                textColor = 'text-blue-500';
+                textColor = 'ttmTW-text-blue-500';
                 header = header.replace('{b}', ''); // Remove the color code from the header
             }
             
             // Check for font size codes in the header and set the font size accordingly
             const fontSizeMatch = header.match(/{f(\d+)}/);
             if (fontSizeMatch) {
-                fontSize = fontSizeMatch[1]; 					// Set the font size to the matched value
-                header = header.replace(fontSizeMatch[0], '');	// Remove the font size code from the header
+                fontSize = fontSizeMatch[1];                    // Set the font size to the matched value
+                header = header.replace(fontSizeMatch[0], '');  // Remove the font size code from the header
             }
             
             header = header.split('_')[0]; // Split the header at underscore and take the first part
@@ -403,11 +380,11 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     function getRowElement(row, headers, index) {
         const tr = document.createElement('tr'); // Create a new table row element
         
-        tr.className = index % 2 === 0 ? '' : 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'; // Apply alternating row styles based on the index of the row
+        tr.className = index % 2 === 0 ? '' : 'ttmTW-bg-white ttmTW-border-b dark:ttmTW-bg-gray-800 dark:ttmTW-border-gray-700 ttmTW-hover:ttmTW-bg-gray-50 dark:ttmTW-hover:ttmTW-bg-gray-600'; // Apply alternating row styles based on the index of the row
         
         let skipCells = 0; // Initialize skipCells to determine if the current cell should be skipped due to colspan
         
-        headers.forEach(({ originalHeader, alignment, textColor, fontSize }) => {
+        headers.forEach(({ originalHeader, alignment, textColor, fontSize }) => { // Iterate through each header
             if (skipCells > 0) { // Check if cells should be skipped due to colspan
                 skipCells--; // Decrease skipCells by 1
                 return; // Skip the current iteration
@@ -415,31 +392,31 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 
             let cellValue = row[originalHeader]; // Get the value of the cell from the row data
             let cellAlignment = alignment; // Set cell text alignment
-            let cellTextColor = textColor === 'text-white' ? 'text-black' : textColor; // Set cell text color
+            let cellTextColor = textColor === 'ttmTW-text-white' ? 'ttmTW-text-black' : textColor; // Set cell text color
             let cellColSpan = 1; // Initialize cellColSpan to 1
             let cellFontCss = fontSize ? `font-size:${fontSize}px` : ''; // Set cell font size if specified
             
             if (cellValue && cellValue.includes('{C}')) { // Check for center alignment in cell value
-                cellAlignment = 'text-center';
+                cellAlignment = 'ttmTW-text-center';
                 cellValue = cellValue.replace('{C}', ''); // Remove alignment tag from cell value
-            } else if (cellValue && cellValue.includes('{L}')) {
-                cellAlignment = 'text-left';
+            } else if (cellValue && cellValue.includes('{L}')) { // Check for left alignment in cell value
+                cellAlignment = 'ttmTW-text-left';
                 cellValue = cellValue.replace('{L}', ''); // Remove alignment tag from cell value
-            } else if (cellValue && cellValue.includes('{R}')) {
-                cellAlignment = 'text-right';
+            } else if (cellValue && cellValue.includes('{R}')) { // Check for right alignment in cell value
+                cellAlignment = 'ttmTW-text-right';
                 cellValue = cellValue.replace('{R}', ''); // Remove alignment tag from cell value
             }
             
             if (cellValue && cellValue.includes('{r}')) { // Check for red text in cell value
-                cellTextColor = 'text-red-500';
+                cellTextColor = 'ttmTW-text-red-500';
                 cellValue = cellValue.replace('{r}', ''); // Remove color tag from cell value
             }
             if (cellValue && cellValue.includes('{g}')) { // Check for green text in cell value
-                cellTextColor = 'text-green-500';
+                cellTextColor = 'ttmTW-text-green-500';
                 cellValue = cellValue.replace('{g}', ''); // Remove color tag from cell value
             }
             if (cellValue && cellValue.includes('{b}')) { // Check for blue text in cell value
-                cellTextColor = 'text-blue-500';
+                cellTextColor = 'ttmTW-text-blue-500';
                 cellValue = cellValue.replace('{b}', ''); // Remove color tag from cell value
             }
             
@@ -484,7 +461,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         // td.style.width = columnWidth; // Set the width attribute for the cell
         td.colSpan = cellColSpan; // Set the colspan attribute for the cell
         
-        td.className = `px-2 py-2 border-b border-gray-200 bg-white font-normal ${cellTextColor} ${cellAlignment} align-middle`; // Set the CSS class for the cell, based on computed color and alignment
+        td.className = `ttmTW-px-2 ttmTW-py-2 ttmTW-border-b ttmTW-border-gray-200 ttmTW-bg-white ttmTW-font-normal ${cellTextColor} ${cellAlignment} ttmTW-align-middle`; // Set the CSS class for the cell, based on computed color and alignment
         
         if (fontCss) { // Check if a specific font size is specified
             td.style.cssText += `; ${fontCss}`; // Apply the computed font size
@@ -497,7 +474,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
             }
             const button = document.createElement('button'); // Create a new button element
             
-            button.className = 'bg-blue-500 hover:bg-blue-700 text-white font-medium py-1 px-2 rounded'; // Set the CSS class for the button
+            button.className = 'ttmTW-bg-blue-500 ttmTW-hover:bg-blue-700 ttmTW-text-white ttmTW-font-medium ttmTW-py-1 ttmTW-px-2 ttmTW-rounded'; // Set the CSS class for the button
             
             button.onclick = () => window.open(buttonURL, '_blank'); // Set the click event handler for the button
             
@@ -515,17 +492,15 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     /**
      * Display a message indicating that no data is available for the widget.
      * 
-     * @param {Element} wrapper - The wrapper element that was supposed to host the widget content.
+     * @param {Element} widgetElement - The HTML element that was supposed to host the widget.
      */
-    function displayNoDataMessage(wrapper) {
-        // Set the inner HTML of the wrapper element to show a 'No data available' message
-        wrapper.innerHTML = '<div class="flex justify-center items-center h-full text-gray-500 text-lg">No data available</div>';
+    function displayNoDataMessage(widgetElement) {
+        // Set the inner HTML of the widget element to show a 'No data available' message
+        widgetElement.innerHTML = '<div class="ttmTW-flex ttmTW-justify-center ttmTW-items-center ttmTW-h-full ttmTW-text-gray-500 ttmTW-text-lg">No data available</div>';
     }
 }
 
-/**
- * Initialize all widgets on the page.
- */
+
 function ttmInitializeWidgets() {
     // Initialize 'ttmTabsWidget' elements
     Array.from(document.getElementsByClassName('ttmTabsWidget')).forEach((element, index) => {
@@ -537,6 +512,7 @@ function ttmInitializeWidgets() {
         ttmCreateGSTWidget(element, index, 'ttmTableWidget');
     });
 }
+
 
 if (document.readyState === 'loading') {
     // If the document is still loading, listen for DOMContentLoaded
