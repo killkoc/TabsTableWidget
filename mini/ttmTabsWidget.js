@@ -188,11 +188,16 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         const allTableContents = tabContentsContainer.querySelectorAll('.table-content');
         allTableContents.forEach(content => content.style.display = 'none');
         
-        // Remove active class from all tabs
-        tabElements.forEach(tab => tab.classList.remove('ttmTW-bg-blue-500'));
+        // Update classes for all tabs
+        tabElements.forEach(tab => {
+            tab.classList.remove('ttmTW-bg-blue-500');  // Remove the blue background
+            tab.classList.add('ttmTW-bg-gray-400');     // Ensure the gray background is applied
+        });
         
         // Set the clicked tab to active
-        tabElements[tabIndex].classList.add('ttmTW-bg-blue-500');
+        const activeTab = tabElements[tabIndex];
+        activeTab.classList.remove('ttmTW-bg-gray-400');  // Remove the gray background
+        activeTab.classList.add('ttmTW-bg-blue-500');     // Add the blue background
         
         // Check if content for clicked tab is already loaded
         if (existingTableContent) {
@@ -207,7 +212,6 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
             tabContentsContainer.appendChild(contentFragment);
         }
     }
-
 
     /**
      * Load data for a specific tab.
