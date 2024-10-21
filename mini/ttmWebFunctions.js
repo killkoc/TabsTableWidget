@@ -32,7 +32,8 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-    // Check if language is valid (undefined, null, or more than 2 chars should do nothing)
+debugger;
+// Check if language is valid (undefined, null, or more than 2 chars should do nothing)
     if (language === undefined || language === null || language.length > 2) {
         return;
     }
