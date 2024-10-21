@@ -51,6 +51,8 @@ function ttmSwitchToLanguage(language) {
     }
     const newPath = '/' + pathParts.join('/');
     if (newPath !== window.location.pathname) window.location.pathname = newPath; // Only update if there's a change
+
+    return newPath;
 }
 
 function ttmSetLanguage(key, language) {
