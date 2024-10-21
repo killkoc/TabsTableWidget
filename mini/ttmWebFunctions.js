@@ -24,8 +24,7 @@ function ttmSetGymLocation() {
 
 	if (gymLocation.length !== 2) {
 		gymLocation = ttmGetLocalStorage('totem');
-	}
-	else {
+	} else {
 		ttmSetLocalStorage('totem', gymLocation);
 	}
 	return(gymLocation);
