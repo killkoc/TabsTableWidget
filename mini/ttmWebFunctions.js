@@ -32,22 +32,47 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-	// switch to correct language
-	if (language !== undefined && language !== null) {
-		location.pathname = '/' + language + location.pathname;
-	}
+    // Check if language is valid (undefined, null, or more than 2 chars should do nothing)
+    if (language === undefined || language === null || language.length > 2) {
+        return;
+    }
+
+    // Split the pathname into parts
+    let pathParts = location.pathname.split('/').filter(Boolean); // filter(Boolean) removes any empty parts
+    
+    // If the first part of the path is a 2-letter language code, handle it
+    if (pathParts[0] && pathParts[0].length === 2) {
+        if (language === '') {
+            // If language is empty, remove the language part
+            pathParts.shift();
+        } else {
+            // Replace the language code with the new one
+            pathParts[0] = language;
+        }
+    } else if (language !== '') {
+        // If no language is present and language is 2 chars, prepend the language
+        pathParts.unshift(language);
+    }
+
+    // Update the location pathname
+    location.pathname = '/' + pathParts.join('/');
 }
 
-function ttmSetLanguage(key) {
-	var language = location.pathname.split('/')[1];
+function ttmSetLanguage(key, language) {
+	switch (language) {
+		case '':
+			language = location.pathname.split('/')[1];
+			if (language.length !== 2) {
+				language = ttmGetLocalStorage(key);
+			}
+			break;
+		case 'en':
+			language = '';
+			break;
+	}
+	ttmSetLocalStorage(key, language);
 
-	if (language.length !== 2) {
-		language = ttmGetLocalStorage(key);
-	}
-	else {
-		ttmSetLocalStorage(key, language);
-	}
-	return(language);
+	return language;
 }
 
 function ttmAddGymButtonsEventListener() {
