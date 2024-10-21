@@ -50,8 +50,8 @@ function ttmSwitchToLanguage(language) {
         pathParts.unshift(language);
     }
     const newPath = '/' + pathParts.join('/');
-    if (newPath !== location.pathname) location.pathname = newPath; // Only update if there's a change
-debugger;    
+    if (newPath !== window.location.pathname) window.location.pathname = newPath; // Only update if there's a change
+
     return newPath;
 }
 
