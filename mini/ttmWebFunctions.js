@@ -31,7 +31,8 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-	debugger;
+	location.pathname = '/about';
+	return;
     if (language == null || language.length > 2) return; // Explicit check for null or undefined
 
     const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
@@ -50,13 +51,11 @@ function ttmSwitchToLanguage(language) {
         // If no language is present and a valid one is provided, prepend it
         pathParts.unshift(language);
     }
-
     const newPath = '/' + pathParts.join('/');
     if (newPath !== location.pathname) location.pathname = newPath; // Only update if there's a change
 }
 
 function ttmSetLanguage(key, language) {
-	debugger;
 	switch (language) {
 		case '':
 			language = location.pathname.split('/')[1];
