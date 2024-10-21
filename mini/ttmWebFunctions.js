@@ -56,6 +56,7 @@ function ttmSwitchToLanguage(language) {
 }
 
 function ttmSetLanguage(key, language) {
+	debugger;
 	switch (language) {
 		case '':
 			language = location.pathname.split('/')[1];
