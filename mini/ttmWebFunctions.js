@@ -14,7 +14,7 @@ function ttmSetLocalStorage(key, value) {
 
 function ttmSwitchToGym(gym) {
 	// switch to correct gym
-	if (gym !== undefined && gym !== null){
+	if (gym !== undefined && gym !== null) {
 		location.pathname = '/' + gym + location.pathname;
 	}
 }
@@ -29,6 +29,25 @@ function ttmSetGymLocation() {
 		ttmSetLocalStorage('totem', gymLocation);
 	}
 	return(gymLocation);
+}
+
+function ttmSwitchToLanguage(language) {
+	// switch to correct language
+	if (language !== undefined && language !== null) {
+		location.pathname = '/' + language + location.pathname;
+	}
+}
+
+function ttmSetLanguage(key) {
+	var language = location.pathname.split('/')[1];
+
+	if (language.length !== 2) {
+		language = ttmGetLocalStorage(key);
+	}
+	else {
+		ttmSetLocalStorage(key, language);
+	}
+	return(language);
 }
 
 function ttmAddGymButtonsEventListener() {
