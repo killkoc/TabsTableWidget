@@ -31,8 +31,6 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-	location.pathname = '/about';
-	return;
     if (language == null || language.length > 2) return; // Explicit check for null or undefined
 
     const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
