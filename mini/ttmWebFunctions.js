@@ -56,7 +56,7 @@ function ttmSetLanguage(key, language) {
 			}
 			break;
 		case 'en':
-			language = null;
+			language = '';
 			break;
 	}
 	ttmSetLocalStorage(key, language);
