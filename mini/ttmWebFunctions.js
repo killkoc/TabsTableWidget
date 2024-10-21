@@ -31,16 +31,22 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-debugger;
     if (language == null || language.length > 2) return; // Explicit check for null or undefined
-    
+
     const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
     const hasLanguage = pathParts[0]?.length === 2;
 
     // Modify path parts based on the language provided
     if (hasLanguage) {
-        language === '' ? pathParts.shift() : pathParts[0] = language;
+        if (language === '') {
+            // Remove the language part if the language is empty
+            pathParts.shift();
+        } else {
+            // Replace the existing language with the new one
+            pathParts[0] = language;
+        }
     } else if (language !== '') {
+        // If no language is present and a valid one is provided, prepend it
         pathParts.unshift(language);
     }
 
