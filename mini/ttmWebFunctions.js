@@ -32,31 +32,20 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
-debugger;
-// Check if language is valid (undefined, null, or more than 2 chars should do nothing)
-    if (language === undefined || language === null || language.length > 2) {
-        return;
-    }
-
-    // Split the pathname into parts
-    let pathParts = location.pathname.split('/').filter(Boolean); // filter(Boolean) removes any empty parts
+    if (language == null || language.length > 2) return; // Explicit check for null or undefined
     
-    // If the first part of the path is a 2-letter language code, handle it
-    if (pathParts[0] && pathParts[0].length === 2) {
-        if (language === '') {
-            // If language is empty, remove the language part
-            pathParts.shift();
-        } else {
-            // Replace the language code with the new one
-            pathParts[0] = language;
-        }
+    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
+    const hasLanguage = pathParts[0]?.length === 2;
+
+    // Modify path parts based on the language provided
+    if (hasLanguage) {
+        language === '' ? pathParts.shift() : pathParts[0] = language;
     } else if (language !== '') {
-        // If no language is present and language is 2 chars, prepend the language
         pathParts.unshift(language);
     }
 
-    // Update the location pathname
-    location.pathname = '/' + pathParts.join('/');
+    const newPath = '/' + pathParts.join('/');
+    if (newPath !== location.pathname) location.pathname = newPath; // Only update if there's a change
 }
 
 function ttmSetLanguage(key, language) {
