@@ -32,6 +32,7 @@ function ttmSetGymLocation() {
 }
 
 function ttmSwitchToLanguage(language) {
+debugger;
 	// switch to correct language
 	if (language !== undefined && language !== null) {
 		location.pathname = '/' + language + location.pathname;
@@ -40,7 +41,7 @@ function ttmSwitchToLanguage(language) {
 
 function ttmSetLanguage(key) {
 	var language = location.pathname.split('/')[1];
-
+debugger;
 	if (language.length !== 2) {
 		language = ttmGetLocalStorage(key);
 	}
