@@ -73,8 +73,8 @@ function ttmSetLanguage(key, language) {
 }
 
 function ttmAddGymButtonsEventListener() {
-	document.querySelectorAll('.gymButton').forEach(button => {
- debugger;   		button.addEventListener('click', function(event) {
+ debugger; 	document.querySelectorAll('.gymButton').forEach(button => {
+  		button.addEventListener('click', function(event) {
         		ttmGymButtonClicked(event); // Pass the URL to the function
     		});
 	});
