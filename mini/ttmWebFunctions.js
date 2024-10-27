@@ -1,4 +1,4 @@
-// Function to retrieve a value from localStorage
+;// Function to retrieve a value from localStorage
 function ttmGetLocalStorage(key) {
     if (typeof(Storage) !== 'undefined') {
         return localStorage.getItem(key);
@@ -320,20 +320,6 @@ function ttmAddGymNavEventListener() {
     });
 }
 
-// Function to handle the click event for gym buttons
-function ttmGymButtonClicked(event) {
-    const pathArray = location.pathname.split('/');
-    const targetSite = event.currentTarget.href;
-
-    if (pathArray.length > 2) {
-        // If there are more than two segments in the path, append the third segment to the targetSite
-        event.currentTarget.href = targetSite + '/' + pathArray[2];
-    } else if (pathArray.length == 2 && pathArray[1].length > 2) {
-        // If there are exactly two segments and the second is longer than 2 characters
-        event.currentTarget.href = targetSite + '/' + pathArray[1];
-    }
-}
-
 // Function to handle the click event for gym choice
 function ttmGymChoiceClicked(event) {
     event.preventDefault(); // Prevent the default action
@@ -375,7 +361,7 @@ function ttmGymChoiceClicked(event) {
 }
 
 // Function to handle the click event for gym options menu
-function ttmGymOptionsClicked(event) {
+function ttmGymOptionClicked(event) {
     event.preventDefault(); // Prevent the default action
 
     // Get the href of the clicked element
