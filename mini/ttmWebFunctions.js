@@ -415,4 +415,4 @@ function ttmGymOptionsClicked(event) {
 }
 
 // Global variable to store the gym location
-var totemLocation = 'undefined';
+var ttmLocation = ttmGetLocalStorage('totem');
