@@ -73,15 +73,17 @@ function ttmSetLanguage(key, language) {
 }
 
 function ttmAddGymButtonsEventListener() {
- debugger; 	document.querySelectorAll('.gymButton').forEach(button => {
-  		button.addEventListener('click', function(event) {
-        		ttmGymButtonClicked(event); // Pass the URL to the function
-    		});
+	$(document).ready(function() {
+	    document.querySelectorAll('.gymButton').forEach(function(button) {
+	        button.addEventListener('click', function(event) {
+	            ttmGymChoiceClicked(event); // Pass the event to the function
+	        });
+	    });
 	});
 }
 
 function ttmGymButtonClicked(event) {
-debugger;	const pathArray = location.pathname.split('/');
+	const pathArray = location.pathname.split('/');
 	const targetSite = event.currentTarget.href;
 
 	if (pathArray.length > 2) {
@@ -91,7 +93,7 @@ debugger;	const pathArray = location.pathname.split('/');
 	}
 }
 
-function ttmGymMenuClicked(event) {
+function ttmGymChoiceClicked(event) {
 	const href = event.target.getAttribute('href');
 
 	if (href && href.startsWith('/')) {
