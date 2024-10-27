@@ -81,7 +81,7 @@ function ttmAddGymButtonsEventListener() {
 }
 
 function ttmGymButtonClicked(event) {
-	const pathArray = location.pathname.split('/');
+debugger;	const pathArray = location.pathname.split('/');
 	const targetSite = event.currentTarget.href;
 
 	if (pathArray.length > 2) {
