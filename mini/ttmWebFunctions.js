@@ -308,11 +308,11 @@ function ttmAddGymButtonsEventListener() {
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymSelectionsEventListener() {
     document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.ttmGymSelectorClass').forEach(function(button) {
+        document.querySelectorAll('.ttmGymChoicesClass').forEach(function(button) {
             button.addEventListener('click', ttmGymChoiceClicked);
         });
         document.querySelectorAll('.ttmGymOptionsClass').forEach(function(button) {
-            button.addEventListener('click', ttmGymOptionsClicked);
+            button.addEventListener('click', ttmGymOptionClicked);
         });
     });
 }
