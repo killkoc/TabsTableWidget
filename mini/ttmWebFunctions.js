@@ -91,4 +91,25 @@ function ttmGymButtonClicked(event) {
 	}
 }
 
+function ttmGymMenuClicked(event) {
+	const href = event.target.getAttribute('href');
+
+	if (href && href.startsWith('/')) {
+		const currentUrl = new URL(window.location.href);
+		const currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
+		const newSegment = href.split('/').filter(Boolean)[0];
+
+		if (newSegment) {
+			if (currentPathSegments.length > 0) {
+				currentPathSegments[0] = newSegment;
+			} else {
+				currentPathSegments.push(newSegment);
+			}
+			const newPath = '/' + currentPathSegments.join('/');
+
+			event.target.href = currentUrl.origin + newPath;
+		}
+	}
+}
+
 var totemLocation = 'undefined';
