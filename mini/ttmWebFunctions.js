@@ -30,40 +30,29 @@ function ttmSetGymLocation() {
 	return(gymLocation);
 }
 
-function ttmGymChoiceClicked(event) {
-    event.preventDefault(); // Prevent the default action
+function ttmSwitchToLanguage(language) {
+    if (language == null || language.length > 2) return; // Explicit check for null or undefined
 
-    // Find the closest anchor or button element
-    var targetElement = event.target.closest('a, button');
-    if (!targetElement) {
-        return; // Exit if no valid element is found
-    }
+    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
+    const hasLanguage = pathParts[0]?.length === 2;
 
-    // Get the gym location from 'href' or 'data-gym' attribute
-    var href = targetElement.getAttribute('href') || targetElement.getAttribute('data-gym');
-
-    if (href && href.startsWith('/')) {
-        const currentUrl = new URL(window.location.href);
-        const newSegment = href.split('/').filter(Boolean)[0];
-        let currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
-
-        if (newSegment) {
-            // Assume gym location codes are always 2 characters long
-            if (currentPathSegments.length >= 1 && currentPathSegments[0].length === 2) {
-                // Replace the existing gym location with the new one
-                currentPathSegments[0] = newSegment;
-            } else {
-                // Insert the new gym location at the beginning of the path
-                currentPathSegments.unshift(newSegment);
-            }
-
-            const newPath = '/' + currentPathSegments.join('/');
-            const newUrl = currentUrl.origin + newPath;
-
-            // Navigate to the new URL
-            window.location.href = newUrl;
+    // Modify path parts based on the language provided
+    if (hasLanguage) {
+        if (language === '') {
+            // Remove the language part if the language is empty
+            pathParts.shift();
+        } else {
+            // Replace the existing language with the new one
+            pathParts[0] = language;
         }
+    } else if (language !== '') {
+        // If no language is present and a valid one is provided, prepend it
+        pathParts.unshift(language);
     }
+    const newPath = '/' + pathParts.join('/');
+    if (newPath !== window.location.pathname) window.location.pathname = newPath; // Only update if there's a change
+
+    return pathParts.join('/');
 }
 
 function ttmSetLanguage(key, language) {
@@ -105,19 +94,24 @@ function ttmGymButtonClicked(event) {
 }
 
 function ttmGymChoiceClicked(event) {
-    let href = event.currentTarget.getAttribute('href');
-	let validCurrentTarget = true;
+    event.preventDefault(); // Prevent the default action
 
-	if (href === null) {
-		href = event.target.getAttribute('href');
-		validCurrentTarget = false;
-	}
+    // Find the closest anchor or button element
+    var targetElement = event.target.closest('a, button');
+    if (!targetElement) {
+        return; // Exit if no valid element is found
+    }
+
+    // Get the gym location from 'href' or 'data-gym' attribute
+    var href = targetElement.getAttribute('href') || targetElement.getAttribute('data-gym');
+
     if (href && href.startsWith('/')) {
         const currentUrl = new URL(window.location.href);
         const newSegment = href.split('/').filter(Boolean)[0];
         let currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
 
         if (newSegment) {
+            // Assume gym location codes are always 2 characters long
             if (currentPathSegments.length >= 1 && currentPathSegments[0].length === 2) {
                 // Replace the existing gym location with the new one
                 currentPathSegments[0] = newSegment;
@@ -125,14 +119,12 @@ function ttmGymChoiceClicked(event) {
                 // Insert the new gym location at the beginning of the path
                 currentPathSegments.unshift(newSegment);
             }
-            const newPath = currentUrl.origin + '/' + currentPathSegments.join('/');
 
-            // Update the href attribute
-            if (validCurrentTarget) {
-				event.currentTarget.href = newPath;
-			} else {
-				event.target.href = newPath;
-			}
+            const newPath = '/' + currentPathSegments.join('/');
+            const newUrl = currentUrl.origin + newPath;
+
+            // Navigate to the new URL
+            window.location.href = newUrl;
         }
     }
 }
