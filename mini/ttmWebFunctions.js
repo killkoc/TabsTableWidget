@@ -398,7 +398,7 @@ function ttmGymOptionsClicked(event) {
         // Reconstruct the target URL pathname
         targetUrl.pathname = '/' + targetPathSegments.join('/');
 
-        // Navigate to the new URL
+        // Navigate to the new URL without creating a new history entry
         window.location.replace(targetUrl.toString());
     }
 }
