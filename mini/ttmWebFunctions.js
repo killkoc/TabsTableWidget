@@ -67,13 +67,11 @@ function ttmReplaceLanguage(pathSegments, newLanguage) {
     if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
         segments.shift();
     }
-
     // If the new language is not the default, add it to the URL
     if (newLanguage !== defaultLanguage) {
         segments.unshift(newLanguage);
     }
     // If newLanguage is the default, we don't include it in the URL
-
     return segments;
 }
 
@@ -91,13 +89,11 @@ function ttmInsertLanguage(pathSegments, language) {
     if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
         segments.shift();
     }
-
     // If the language is not the default, insert it
     if (language !== defaultLanguage) {
         segments.unshift(language);
     }
     // If the language is the default, do not insert it
-
     return segments;
 }
 
@@ -305,6 +301,18 @@ function ttmAddGymButtonsEventListener() {
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.gymButton').forEach(function(button) {
             button.addEventListener('click', ttmGymChoiceClicked);
+        });
+    });
+}
+
+// Function to add click event listeners to elements with class 'gymButton' when the document is ready
+function ttmAddGymSelectionsEventListener() {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.ttmGymSelectorClass').forEach(function(button) {
+            button.addEventListener('click', ttmGymChoiceClicked);
+        });
+        document.querySelectorAll('.ttmGymOptionsClass').forEach(function(button) {
+            button.addEventListener('click', ttmGymOptionsClicked);
         });
     });
 }
