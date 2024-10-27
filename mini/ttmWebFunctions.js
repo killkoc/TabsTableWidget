@@ -95,7 +95,7 @@ function ttmGymButtonClicked(event) {
 
 function ttmGymChoiceClicked(event) {
 	const href = event.target.getAttribute('href');
-
+debugger;
 	if (href && href.startsWith('/')) {
 		const currentUrl = new URL(window.location.href);
 		const currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
