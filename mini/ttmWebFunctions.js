@@ -96,6 +96,12 @@ function ttmGymButtonClicked(event) {
 function ttmGymChoiceClicked(event) {
 debugger;
     var href = event.currentTarget.getAttribute('href');
+	var validCurrentTarget = true;
+
+	if (href === null) {
+		href = event.target.getAttribute('href');
+		validCurrentTarget = false;
+	}
     if (href && href.startsWith('/')) {
         const currentUrl = new URL(window.location.href);
         let currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
@@ -115,10 +121,14 @@ debugger;
                 currentPathSegments.unshift(newSegment);
             }
 
-            const newPath = '/' + currentPathSegments.join('/');
+            const newPath = currentUrl.origin + '/' + currentPathSegments.join('/');
 
             // Update the href attribute
-            event.currentTarget.href = currentUrl.origin + newPath;
+            if (validCurrentTarget) {
+				event.currentTarget.href = newPath;
+			} else {
+				event.target.href = newPath;
+			}
         }
     }
 }
