@@ -13,6 +13,22 @@ function ttmSetLocalStorage(key, value) {
     }
 }
 
+// Set the default Language for a given site
+function ttmSetDefaultLanguage(defaultLanguage) {
+    ttmSetLocalStorage('ttmDefaultLang', defaultLanguage);
+}
+
+// Get default Language from local storage
+function ttmGetDefaultLanguage() {
+    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
+    
+    // Check if default language is already set in localStorage
+    if (!defaultLanguage) {
+        defaultLanguage = 'en';
+    }
+    return defaultLanguage;
+}
+
 /**
  * Checks if a segment is a valid language code.
  * @param {string} segment - The path segment to check.
@@ -25,11 +41,6 @@ function ttmIsLanguageCode(segment) {
     return languageCodes.includes(segment);
 }
 
-// Helper function to check if a segment is a gym code
-function ttmIsGymCode(segment) {
-    return segment.length === 2 && !ttmIsLanguageCode(segment);
-}
-
 /**
  * Finds the language code in the path segments.
  * @param {Array} pathSegments - Array of path segments.
@@ -40,6 +51,175 @@ function ttmFindLanguage(pathSegments) {
         return pathSegments[0];
     }
     return null;
+}
+
+/**
+ * Replaces or removes the language code in the path segments based on the default language.
+ * @param {Array} pathSegments - Array of path segments.
+ * @param {string} newLanguage - The new language code.
+ * @returns {Array} - Modified array of path segments.
+ */
+function ttmReplaceLanguage(pathSegments, newLanguage) {
+    let segments = [...pathSegments];
+    const defaultLanguage = ttmGetDefaultLanguage();
+
+    // Remove existing language code if present
+    if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
+        segments.shift();
+    }
+
+    // If the new language is not the default, add it to the URL
+    if (newLanguage !== defaultLanguage) {
+        segments.unshift(newLanguage);
+    }
+    // If newLanguage is the default, we don't include it in the URL
+
+    return segments;
+}
+
+/**
+ * Inserts a language code into the path segments if it's not already present.
+ * @param {Array} pathSegments - Array of path segments.
+ * @param {string} language - The language code to insert.
+ * @returns {Array} - Modified array of path segments.
+ */
+function ttmInsertLanguage(pathSegments, language) {
+    let segments = [...pathSegments];
+    const defaultLanguage = ttmGetDefaultLanguage();
+
+    // Remove existing language code if present
+    if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
+        segments.shift();
+    }
+
+    // If the language is not the default, insert it
+    if (language !== defaultLanguage) {
+        segments.unshift(language);
+    }
+    // If the language is the default, do not insert it
+
+    return segments;
+}
+
+/**
+ * Removes the language code from the path segments.
+ * @param {Array} pathSegments - Array of path segments.
+ * @returns {Array} - Modified array of path segments without the language code.
+ */
+function ttmRemoveLanguage(pathSegments) {
+    if (pathSegments.length > 0 && ttmIsLanguageCode(pathSegments[0])) {
+        return pathSegments.slice(1);
+    }
+    return pathSegments.slice();
+}
+
+/**
+ * Switches the current URL to the specified language.
+ * Omits the default language code from the URL.
+ * @param {string} language - The language code to switch to.
+ */
+function ttmSwitchToLanguage(language) {
+    if (!language || language.length > 2) return; // Invalid language code
+
+    if (!ttmIsLanguageCode(language)) {
+        console.error('Invalid language code:', language);
+        return;
+    }
+    const defaultLanguage = ttmGetDefaultLanguage();
+
+    const currentUrl = new URL(window.location.href);
+    let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
+
+    // Remove existing language code if present
+    pathSegments = ttmRemoveLanguage(pathSegments);
+
+    // Insert the new language code
+    pathSegments = ttmInsertLanguage(pathSegments, language);
+
+    const newPath = '/' + pathSegments.join('/');
+    // Only update if there's a change
+    if (newPath !== currentUrl.pathname) {
+        currentUrl.pathname = newPath;
+        window.location.href = currentUrl.toString();
+    }
+    return language;
+}
+
+/**
+ * Sets the language based on the provided language code or retrieves it from the URL or localStorage.
+ * @param {string} key - The localStorage key for the language setting.
+ * @param {string} language - The language code to set.
+ * @returns {string} - The language code that has been set.
+ */
+function ttmSetLanguage(key, language) {
+    const defaultLanguage = ttmGetDefaultLanguage();
+
+    if (!language) {
+        // If language is not provided, get it from the URL or localStorage
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        language = ttmFindLanguage(pathSegments) || ttmGetLocalStorage(key) || defaultLanguage;
+    }
+    // Save the language to localStorage
+    ttmSetLocalStorage(key, language);
+
+    return language;
+}
+
+/******
+// Function to switch to a specific language by modifying the URL pathname
+function ttmSwitchToLanguage(language) {
+    if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
+
+    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty segments
+    const hasLanguage = pathParts[0] && pathParts[0].length === 2; // Check if the first segment is a language code
+
+    // Modify path parts based on the language provided
+    if (hasLanguage) {
+        if (language === '') {
+            // Remove the language part if the language is empty
+            pathParts.shift();
+        } else {
+            // Replace the existing language with the new one
+            pathParts[0] = language;
+        }
+    } else if (language !== '') {
+        // If no language is present and a valid one is provided, prepend it
+        pathParts.unshift(language);
+    }
+
+    const newPath = '/' + pathParts.join('/');
+    // Only update if there's a change
+    if (newPath !== window.location.pathname) {
+        window.location.pathname = newPath;
+    }
+    return pathParts.join('/');
+}
+
+// Function to set the language based on the key and provided language code
+function ttmSetLanguage(key, language) {
+    switch (language) {
+        case '':
+            // If language is empty, get it from the URL or localStorage
+            language = location.pathname.split('/')[1];
+            if (language.length !== 2) {
+                language = ttmGetLocalStorage(key);
+            }
+            break;
+        case 'en':
+            // If language is 'en', set it to empty string (default)
+            language = '';
+            break;
+    }
+    // Save the language to localStorage
+    ttmSetLocalStorage(key, language);
+
+    return language;
+}
+*******/
+
+// Helper function to check if a segment is a gym code
+function ttmIsGymCode(segment) {
+    return segment.length === 2 && !ttmIsLanguageCode(segment);
 }
 
 /**
@@ -58,30 +238,6 @@ function ttmFindGym(pathSegments) {
         }
     }
     return null;
-}
-
-/**
- * Replaces or removes the language code in the path segments based on the default language.
- * @param {Array} pathSegments - Array of path segments.
- * @param {string} newLanguage - The new language code.
- * @param {string} defaultLanguage - The default language code.
- * @returns {Array} - Modified array of path segments.
- */
-function ttmReplaceLanguage(pathSegments, newLanguage, defaultLanguage) {
-    let segments = [...pathSegments];
-
-    // Remove existing language code if present
-    if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
-        segments.shift();
-    }
-
-    // If the new language is not the default, add it to the URL
-    if (newLanguage !== defaultLanguage) {
-        segments.unshift(newLanguage);
-    }
-    // If newLanguage is defaultLanguage, we don't include it in the URL
-
-    return segments;
 }
 
 /**
@@ -116,33 +272,6 @@ function ttmReplaceGym(pathSegments, newGym) {
 }
 
 /**
- * Inserts a language code into the path segments if it's not already present.
- * @param {Array} pathSegments - Array of path segments.
- * @param {string} language - The language code to insert.
- * @param {string} defaultLanguage - The default language code.
- * @returns {Array} - Modified array of path segments.
- */
-function ttmInsertLanguage(pathSegments, language, defaultLanguage) {
-    if (!ttmIsLanguageCode(language)) return pathSegments.slice(); // Invalid language code
-
-    let segments = [...pathSegments];
-
-    // If the language is the default language, do not insert it into the URL
-    if (language === defaultLanguage) {
-        // Remove existing language code if present
-        if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
-            segments.shift();
-        }
-        return segments;
-    }
-    // Insert language code if not already present
-    if (segments.length === 0 || !ttmIsLanguageCode(segments[0])) {
-        segments.unshift(language);
-    }
-    return segments;
-}
-
-/**
  * Inserts a gym code into the path segments if it's not already present.
  * @param {Array} pathSegments - Array of path segments.
  * @param {string} gym - The gym code to insert.
@@ -158,25 +287,11 @@ function ttmInsertGym(pathSegments, gym) {
     if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
         index = 1;
     }
-
     // Insert gym code if not already present at the determined index
     if (segments.length <= index || !ttmIsGymCode(segments[index])) {
         segments.splice(index, 0, gym);
     }
-
     return segments;
-}
-
-/**
- * Removes the language code from the path segments.
- * @param {Array} pathSegments - Array of path segments.
- * @returns {Array} - Modified array of path segments without the language code.
- */
-function ttmRemoveLanguage(pathSegments) {
-    if (pathSegments.length > 0 && ttmIsLanguageCode(pathSegments[0])) {
-        return pathSegments.slice(1);
-    }
-    return pathSegments.slice();
 }
 
 /**
@@ -236,111 +351,6 @@ function ttmSetGymLocation() {
     }
     return gymLocation;
 }
-
-/**
- * Switches the current URL to the specified language.
- * Omits the default language code from the URL.
- * @param {string} language - The language code to switch to.
- * @param {string} defaultLanguage - The default language code (defaults to 'fr').
- */
-function ttmSwitchToLanguage(language, defaultLanguage = 'en') {
-    event.preventDefault(); // Prevent the default action
-    
-    if (!language || language.length > 2) return; // Invalid language code
-
-    if (!ttmIsLanguageCode(language)) {
-        console.error('Invalid language code:', language);
-        return;
-    }
-    const currentUrl = new URL(window.location.href);
-    let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
-
-    // Remove existing language code if present
-    pathSegments = ttmRemoveLanguage(pathSegments);
-
-    // Insert the new language code
-    pathSegments = ttmInsertLanguage(pathSegments, language, defaultLanguage);
-
-    const newPath = '/' + pathSegments.join('/');
-    // Only update if there's a change
-    if (newPath !== currentUrl.pathname) {
-        currentUrl.pathname = newPath;
-        window.location.replace(currentUrl.toString()); // Update location without creating a new entry in history
-    }
-    return language;
-}
-
-/**
- * Sets the language based on the provided language code or retrieves it from the URL or localStorage.
- * @param {string} key - The localStorage key for the language setting.
- * @param {string} language - The language code to set.
- * @param {string} defaultLanguage - The default language code (defaults to 'fr').
- * @returns {string} - The language code that has been set.
- */
-function ttmSetLanguage(key, language, defaultLanguage = 'en') {
-    if (!language) {
-        // If language is not provided, get it from the URL or localStorage
-        const pathSegments = window.location.pathname.split('/').filter(Boolean);
-        language = ttmFindLanguage(pathSegments) || ttmGetLocalStorage(key) || defaultLanguage;
-    }
-
-    // Save the language to localStorage
-    ttmSetLocalStorage(key, language);
-
-    return language;
-}
-
-/******
-// Function to switch to a specific language by modifying the URL pathname
-function ttmSwitchToLanguage(language) {
-    if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
-
-    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty segments
-    const hasLanguage = pathParts[0] && pathParts[0].length === 2; // Check if the first segment is a language code
-
-    // Modify path parts based on the language provided
-    if (hasLanguage) {
-        if (language === '') {
-            // Remove the language part if the language is empty
-            pathParts.shift();
-        } else {
-            // Replace the existing language with the new one
-            pathParts[0] = language;
-        }
-    } else if (language !== '') {
-        // If no language is present and a valid one is provided, prepend it
-        pathParts.unshift(language);
-    }
-
-    const newPath = '/' + pathParts.join('/');
-    // Only update if there's a change
-    if (newPath !== window.location.pathname) {
-        window.location.pathname = newPath;
-    }
-    return pathParts.join('/');
-}
-
-// Function to set the language based on the key and provided language code
-function ttmSetLanguage(key, language) {
-    switch (language) {
-        case '':
-            // If language is empty, get it from the URL or localStorage
-            language = location.pathname.split('/')[1];
-            if (language.length !== 2) {
-                language = ttmGetLocalStorage(key);
-            }
-            break;
-        case 'en':
-            // If language is 'en', set it to empty string (default)
-            language = '';
-            break;
-    }
-    // Save the language to localStorage
-    ttmSetLocalStorage(key, language);
-
-    return language;
-}
-*******/
 
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymButtonsEventListener() {
@@ -409,26 +419,39 @@ function ttmGymChoiceClicked(event) {
 function ttmGymOptionsClicked(event) {
     event.preventDefault(); // Prevent the default action
 
-    var href = event.target.getAttribute('href');
+    // Get the href of the clicked element
+    let href = event.target.getAttribute('href');
 
     if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('/'))) {
-        var currentUrl = new URL(window.location.href);
-        var currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
-        var firstSegment = currentPathSegments[0];
+        // Parse the target URL
+        let targetUrl = new URL(href, window.location.origin);
+        let targetPathSegments = targetUrl.pathname.split('/').filter(Boolean);
 
-        if (firstSegment) {
-            var targetUrl = new URL(href, window.location.origin);
-            var targetPathSegments = targetUrl.pathname.split('/').filter(Boolean);
+        // Check if the target URL has language or gym code
+        let targetLanguage = ttmFindLanguage(targetPathSegments);
+        let targetGym = ttmFindGym(targetPathSegments);
 
-            targetPathSegments = targetPathSegments.filter(function(segment) {
-                return segment !== firstSegment;
-            });
+        // Get the current language and gym code from the current URL
+        let currentPathSegments = window.location.pathname.split('/').filter(Boolean);
+        let currentLanguage = ttmFindLanguage(currentPathSegments);
+        let currentGym = ttmFindGym(currentPathSegments);
 
-            targetPathSegments.unshift(firstSegment);
+        // Retrieve default language
+        const defaultLanguage = ttmGetDefaultLanguage();
 
-            targetUrl.pathname = '/' + targetPathSegments.join('/');
-            event.target.href = targetUrl.toString();
+        // Insert current language code if missing in the target URL
+        if (!targetLanguage && currentLanguage) {
+            targetPathSegments = ttmInsertLanguage(targetPathSegments, currentLanguage);
         }
+        // Insert current gym code if missing in the target URL
+        if (!targetGym && currentGym) {
+            targetPathSegments = ttmInsertGym(targetPathSegments, currentGym);
+        }
+        // Reconstruct the target URL pathname
+        targetUrl.pathname = '/' + targetPathSegments.join('/');
+
+        // Navigate to the new URL
+        window.location.replace(targetUrl.toString());
     }
 }
 
