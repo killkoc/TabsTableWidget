@@ -94,25 +94,34 @@ function ttmGymButtonClicked(event) {
 }
 
 function ttmGymChoiceClicked(event) {
-	var href = event.target.getAttribute('href');
-	if (href === null) href = event.currentTarget.getAttribute('href');
-debugger;
-	if (href && href.startsWith('/')) {
-		const currentUrl = new URL(window.location.href);
-		const currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
-		const newSegment = href.split('/').filter(Boolean)[0];
+    var href = event.target.getAttribute('href');
+    if (href === null) href = event.currentTarget.getAttribute('href');
 
-		if (newSegment) {
-			if (currentPathSegments.length > 0) {
-				currentPathSegments[0] = newSegment;
-			} else {
-				currentPathSegments.push(newSegment);
-			}
-			const newPath = '/' + currentPathSegments.join('/');
+    if (href && href.startsWith('/')) {
+        const currentUrl = new URL(window.location.href);
+        let currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
+        const newSegment = href.split('/').filter(Boolean)[0];
 
-			event.target.href = currentUrl.origin + newPath;
-		}
-	}
+        if (newSegment) {
+            // Helper function to determine if a segment is a gym location
+            function isGymLocation(segment) {
+                return segment.length === 2; // Adjust this logic based on your gym location format
+            }
+
+            if (currentPathSegments.length >= 1 && isGymLocation(currentPathSegments[0])) {
+                // Replace the existing gym location with the new one
+                currentPathSegments[0] = newSegment;
+            } else {
+                // Insert the new gym location at the beginning of the path
+                currentPathSegments.unshift(newSegment);
+            }
+
+            const newPath = '/' + currentPathSegments.join('/');
+
+            // Update the href attribute
+            event.target.href = currentUrl.origin + newPath;
+        }
+    }
 }
 
 var totemLocation = 'undefined';
