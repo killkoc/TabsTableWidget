@@ -13,11 +13,15 @@ function ttmSetLocalStorage(key, value) {
     }
 }
 
-// Helper function to check if a segment is a language code
+/**
+ * Checks if a segment is a valid language code.
+ * @param {string} segment - The path segment to check.
+ * @returns {boolean} - True if it's a valid language code.
+ */
 function ttmIsLanguageCode(segment) {
     // List of valid language codes
     const languageCodes = ['fr', 'en', 'de', 'it', 'es'];
-    
+
     return languageCodes.includes(segment);
 }
 
@@ -57,24 +61,27 @@ function ttmFindGym(pathSegments) {
 }
 
 /**
- * Replaces the language code in the path segments with a new one.
+ * Replaces or removes the language code in the path segments based on the default language.
  * @param {Array} pathSegments - Array of path segments.
  * @param {string} newLanguage - The new language code.
+ * @param {string} defaultLanguage - The default language code.
  * @returns {Array} - Modified array of path segments.
  */
-function ttmReplaceLanguage(pathSegments, newLanguage) {
-    let newPathSegments = pathSegments.slice();
-    if (ttmIsLanguageCode(newLanguage)) {
-        if (newPathSegments.length > 0 && ttmIsLanguageCode(newPathSegments[0])) {
-            newPathSegments[0] = newLanguage;
-        } else {
-            newPathSegments.unshift(newLanguage);
-        }
-    } else {
-        // Remove existing language code if newLanguage is invalid
-        newPathSegments = ttmRemoveLanguage(newPathSegments);
+function ttmReplaceLanguage(pathSegments, newLanguage, defaultLanguage) {
+    let segments = [...pathSegments];
+
+    // Remove existing language code if present
+    if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
+        segments.shift();
     }
-    return newPathSegments;
+
+    // If the new language is not the default, add it to the URL
+    if (newLanguage !== defaultLanguage) {
+        segments.unshift(newLanguage);
+    }
+    // If newLanguage is defaultLanguage, we don't include it in the URL
+
+    return segments;
 }
 
 /**
@@ -109,52 +116,55 @@ function ttmReplaceGym(pathSegments, newGym) {
 }
 
 /**
- * Inserts a language code into the path segments.
+ * Inserts a language code into the path segments if it's not already present.
  * @param {Array} pathSegments - Array of path segments.
  * @param {string} language - The language code to insert.
+ * @param {string} defaultLanguage - The default language code.
  * @returns {Array} - Modified array of path segments.
  */
-function ttmInsertLanguage(pathSegments, language) {
-    if (ttmIsLanguageCode(language)) {
-        let newPathSegments = pathSegments.slice();
-        if (newPathSegments.length === 0 || !ttmIsLanguageCode(newPathSegments[0])) {
-            newPathSegments.unshift(language);
+function ttmInsertLanguage(pathSegments, language, defaultLanguage) {
+    if (!ttmIsLanguageCode(language)) return pathSegments.slice(); // Invalid language code
+
+    let segments = [...pathSegments];
+
+    // If the language is the default language, do not insert it into the URL
+    if (language === defaultLanguage) {
+        // Remove existing language code if present
+        if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
+            segments.shift();
         }
-        // Else, language code already exists at the beginning
-        return newPathSegments;
-    } else {
-        // Invalid language code; return the original segments
-        return pathSegments.slice();
+        return segments;
     }
+    // Insert language code if not already present
+    if (segments.length === 0 || !ttmIsLanguageCode(segments[0])) {
+        segments.unshift(language);
+    }
+    return segments;
 }
 
 /**
- * Inserts a gym code into the path segments.
+ * Inserts a gym code into the path segments if it's not already present.
  * @param {Array} pathSegments - Array of path segments.
  * @param {string} gym - The gym code to insert.
  * @returns {Array} - Modified array of path segments.
  */
 function ttmInsertGym(pathSegments, gym) {
-    if (ttmIsGymCode(gym)) {
-        let newPathSegments = pathSegments.slice();
-        if (newPathSegments.length === 0) {
-            newPathSegments.push(gym);
-        } else {
-            if (ttmIsLanguageCode(newPathSegments[0])) {
-                if (newPathSegments.length === 1 || !ttmIsGymCode(newPathSegments[1])) {
-                    newPathSegments.splice(1, 0, gym);
-                }
-                // Else, gym code already exists at the second position
-            } else if (!ttmIsGymCode(newPathSegments[0])) {
-                newPathSegments.unshift(gym);
-            }
-            // Else, gym code already exists at the beginning
-        }
-        return newPathSegments;
-    } else {
-        // Invalid gym code; return the original segments
-        return pathSegments.slice();
+    if (!ttmIsGymCode(gym)) return pathSegments.slice(); // Invalid gym code
+
+    let segments = [...pathSegments];
+    let index = 0;
+
+    // Determine the position to insert the gym code
+    if (segments.length > 0 && ttmIsLanguageCode(segments[0])) {
+        index = 1;
     }
+
+    // Insert gym code if not already present at the determined index
+    if (segments.length <= index || !ttmIsGymCode(segments[index])) {
+        segments.splice(index, 0, gym);
+    }
+
+    return segments;
 }
 
 /**
@@ -191,11 +201,19 @@ function ttmRemoveGym(pathSegments) {
 // Function to switch to a specific gym by updating the URL pathname
 function ttmSwitchToGym(gym) {
     if (gym) {
+        if (!ttmIsGymCode(gym)) {
+            console.error('Invalid gym code:', gym);
+            return;
+        }
+
         const currentUrl = new URL(window.location.href);
         let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
 
-        // Use the replaceGym helper function to update the gym code in the path
-        pathSegments = ttmReplaceGym(pathSegments, gym);
+        // Remove existing gym code if present
+        pathSegments = ttmRemoveGym(pathSegments);
+
+        // Insert the new gym code
+        pathSegments = ttmInsertGym(pathSegments, gym);
 
         // Reconstruct the URL pathname
         currentUrl.pathname = '/' + pathSegments.join('/');
@@ -220,6 +238,58 @@ function ttmSetGymLocation() {
     return gymLocation;
 }
 
+/**
+ * Switches the current URL to the specified language.
+ * Omits the default language code from the URL.
+ * @param {string} language - The language code to switch to.
+ * @param {string} defaultLanguage - The default language code (defaults to 'fr').
+ */
+function ttmSwitchToLanguage(language, defaultLanguage = 'en') {
+    if (!language || language.length > 2) return; // Invalid language code
+
+    if (!ttmIsLanguageCode(language)) {
+        console.error('Invalid language code:', language);
+        return;
+    }
+    const currentUrl = new URL(window.location.href);
+    let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
+
+    // Remove existing language code if present
+    pathSegments = ttmRemoveLanguage(pathSegments);
+
+    // Insert the new language code
+    pathSegments = ttmInsertLanguage(pathSegments, language, defaultLanguage);
+
+    const newPath = '/' + pathSegments.join('/');
+    // Only update if there's a change
+    if (newPath !== currentUrl.pathname) {
+        currentUrl.pathname = newPath;
+        window.location.href = currentUrl.toString();
+    }
+    return language;
+}
+
+/**
+ * Sets the language based on the provided language code or retrieves it from the URL or localStorage.
+ * @param {string} key - The localStorage key for the language setting.
+ * @param {string} language - The language code to set.
+ * @param {string} defaultLanguage - The default language code (defaults to 'fr').
+ * @returns {string} - The language code that has been set.
+ */
+function ttmSetLanguage(key, language, defaultLanguage = 'en') {
+    if (!language) {
+        // If language is not provided, get it from the URL or localStorage
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        language = ttmFindLanguage(pathSegments) || ttmGetLocalStorage(key) || defaultLanguage;
+    }
+
+    // Save the language to localStorage
+    ttmSetLocalStorage(key, language);
+
+    return language;
+}
+
+/******
 // Function to switch to a specific language by modifying the URL pathname
 function ttmSwitchToLanguage(language) {
     if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
@@ -269,6 +339,7 @@ function ttmSetLanguage(key, language) {
 
     return language;
 }
+*******/
 
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymButtonsEventListener() {
@@ -303,7 +374,6 @@ function ttmGymChoiceClicked(event) {
     if (!targetElement) {
         return; // Exit if no valid element is found
     }
-
     // Get the gym code from 'href' or 'data-gym' attribute
     let href = targetElement.getAttribute('href') || targetElement.getAttribute('data-gym');
 
@@ -316,12 +386,14 @@ function ttmGymChoiceClicked(event) {
             console.error('Invalid gym code:', newGymCode);
             return;
         }
-
         const currentUrl = new URL(window.location.href);
         let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
 
-        // Use the replaceGym helper function to update the gym code in the path
-        pathSegments = ttmReplaceGym(pathSegments, newGymCode);
+        // Remove existing gym code if present
+        pathSegments = ttmRemoveGym(pathSegments);
+
+        // Insert the new gym code
+        pathSegments = ttmInsertGym(pathSegments, newGymCode);
 
         // Reconstruct the URL pathname
         const newPath = '/' + pathSegments.join('/');
@@ -331,5 +403,6 @@ function ttmGymChoiceClicked(event) {
         window.location.href = newUrl;
     }
 }
+
 // Global variable to store the gym location
 var totemLocation = 'undefined';
