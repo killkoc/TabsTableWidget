@@ -1,40 +1,47 @@
-
+// Function to retrieve a value from localStorage
 function ttmGetLocalStorage(key) {
-	if (typeof(Storage) !== 'undefined') {
-		return(localStorage.getItem(key));
-	}
-	return('undefined');
+    if (typeof(Storage) !== 'undefined') {
+        return localStorage.getItem(key);
+    }
+    return 'undefined'; // Return 'undefined' as a string if localStorage is not available
 }
 
+// Function to store a value in localStorage
 function ttmSetLocalStorage(key, value) {
-	if (typeof(Storage) !== 'undefined') {
-		localStorage.setItem(key, value);
-	}
+    if (typeof(Storage) !== 'undefined') {
+        localStorage.setItem(key, value);
+    }
 }
 
+// Function to switch to a specific gym by updating the URL pathname
 function ttmSwitchToGym(gym) {
-	// switch to correct gym
-	if (gym !== undefined && gym !== null) {
-		location.pathname = '/' + gym + location.pathname;
-	}
+    // Check if 'gym' is defined and not null
+    if (gym !== undefined && gym !== null) {
+        // Update the pathname to include the gym code
+        location.pathname = '/' + gym + location.pathname;
+    }
 }
 
+// Function to set the gym location based on the URL or localStorage
 function ttmSetGymLocation() {
-	var gymLocation = location.pathname.split('/')[1];
+    var gymLocation = location.pathname.split('/')[1]; // Get the first path segment
 
-	if (gymLocation.length !== 2) {
-		gymLocation = ttmGetLocalStorage('totem');
-	} else {
-		ttmSetLocalStorage('totem', gymLocation);
-	}
-	return(gymLocation);
+    if (gymLocation.length !== 2) {
+        // If the first segment is not a 2-character gym code, get it from localStorage
+        gymLocation = ttmGetLocalStorage('totem');
+    } else {
+        // Save the gym code to localStorage
+        ttmSetLocalStorage('totem', gymLocation);
+    }
+    return gymLocation;
 }
 
+// Function to switch to a specific language by modifying the URL pathname
 function ttmSwitchToLanguage(language) {
-    if (language == null || language.length > 2) return; // Explicit check for null or undefined
+    if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
 
-    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty parts
-    const hasLanguage = pathParts[0]?.length === 2;
+    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty segments
+    const hasLanguage = pathParts[0]?.length === 2; // Check if the first segment is a language code
 
     // Modify path parts based on the language provided
     if (hasLanguage) {
@@ -49,50 +56,63 @@ function ttmSwitchToLanguage(language) {
         // If no language is present and a valid one is provided, prepend it
         pathParts.unshift(language);
     }
+
     const newPath = '/' + pathParts.join('/');
-    if (newPath !== window.location.pathname) window.location.pathname = newPath; // Only update if there's a change
+    // Only update if there's a change
+    if (newPath !== window.location.pathname) {
+        window.location.pathname = newPath;
+    }
 
     return pathParts.join('/');
 }
 
+// Function to set the language based on the key and provided language code
 function ttmSetLanguage(key, language) {
-	switch (language) {
-		case '':
-			language = location.pathname.split('/')[1];
-			if (language.length !== 2) {
-				language = ttmGetLocalStorage(key);
-			}
-			break;
-		case 'en':
-			language = '';
-			break;
-	}
-	ttmSetLocalStorage(key, language);
+    switch (language) {
+        case '':
+            // If language is empty, get it from the URL or localStorage
+            language = location.pathname.split('/')[1];
+            if (language.length !== 2) {
+                language = ttmGetLocalStorage(key);
+            }
+            break;
+        case 'en':
+            // If language is 'en', set it to empty string (default)
+            language = '';
+            break;
+    }
+    // Save the language to localStorage
+    ttmSetLocalStorage(key, language);
 
-	return language;
+    return language;
 }
 
+// Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymButtonsEventListener() {
-	$(document).ready(function() {
-	    document.querySelectorAll('.gymButton').forEach(function(button) {
-	        button.addEventListener('click', function(event) {
-	            ttmGymChoiceClicked(event); // Pass the event to the function
-	        });
-	    });
-	});
+    $(document).ready(function() {
+        document.querySelectorAll('.gymButton').forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                ttmGymChoiceClicked(event); // Pass the event to the function
+            });
+        });
+    });
 }
 
+// Function to handle the click event for gym buttons
 function ttmGymButtonClicked(event) {
-	const pathArray = location.pathname.split('/');
-	const targetSite = event.currentTarget.href;
+    const pathArray = location.pathname.split('/');
+    const targetSite = event.currentTarget.href;
 
-	if (pathArray.length > 2) {
-		event.currentTarget.href = targetSite + '/' + pathArray[2];
-	} else if (pathArray.length == 2 && pathArray[1].length > 2) {
-		event.currentTarget.href = targetSite + '/' + pathArray[1];
-	}
+    if (pathArray.length > 2) {
+        // If there are more than two segments in the path, append the third segment to the targetSite
+        event.currentTarget.href = targetSite + '/' + pathArray[2];
+    } else if (pathArray.length == 2 && pathArray[1].length > 2) {
+        // If there are exactly two segments and the second is longer than 2 characters
+        event.currentTarget.href = targetSite + '/' + pathArray[1];
+    }
 }
 
+// Function to handle the click event for gym choice
 function ttmGymChoiceClicked(event) {
     event.preventDefault(); // Prevent the default action
 
@@ -129,4 +149,5 @@ function ttmGymChoiceClicked(event) {
     }
 }
 
+// Global variable to store the gym location (currently unused)
 var totemLocation = 'undefined';
