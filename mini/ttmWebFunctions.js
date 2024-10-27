@@ -94,7 +94,6 @@ function ttmGymButtonClicked(event) {
 }
 
 function ttmGymChoiceClicked(event) {
-debugger;
     var href = event.currentTarget.getAttribute('href');
 	var validCurrentTarget = true;
 
