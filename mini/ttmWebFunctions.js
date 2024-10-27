@@ -205,7 +205,6 @@ function ttmSwitchToGym(gym) {
             console.error('Invalid gym code:', gym);
             return;
         }
-
         const currentUrl = new URL(window.location.href);
         let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
 
@@ -218,8 +217,8 @@ function ttmSwitchToGym(gym) {
         // Reconstruct the URL pathname
         currentUrl.pathname = '/' + pathSegments.join('/');
 
-        // Navigate to the new URL
-        window.location.href = currentUrl.toString();
+        // Navigate to the new URL without creating a new history entry
+        window.location.replace(currentUrl.toString());        // Navigate to the new URL
     }
 }
 
@@ -245,6 +244,8 @@ function ttmSetGymLocation() {
  * @param {string} defaultLanguage - The default language code (defaults to 'fr').
  */
 function ttmSwitchToLanguage(language, defaultLanguage = 'en') {
+    event.preventDefault(); // Prevent the default action
+    
     if (!language || language.length > 2) return; // Invalid language code
 
     if (!ttmIsLanguageCode(language)) {
@@ -264,7 +265,7 @@ function ttmSwitchToLanguage(language, defaultLanguage = 'en') {
     // Only update if there's a change
     if (newPath !== currentUrl.pathname) {
         currentUrl.pathname = newPath;
-        window.location.href = currentUrl.toString();
+        window.location.replace(currentUrl.toString()); // Update location without creating a new entry in history
     }
     return language;
 }
@@ -399,8 +400,35 @@ function ttmGymChoiceClicked(event) {
         const newPath = '/' + pathSegments.join('/');
         const newUrl = currentUrl.origin + newPath;
 
-        // Navigate to the new URL
-        window.location.href = newUrl;
+        // Navigate to the new URL without creating a new history entry
+        window.location.replace(newUrl);
+    }
+}
+
+// Function to handle the click event for gym options menu
+function ttmGymOptionsClicked(event) {
+    event.preventDefault(); // Prevent the default action
+
+    var href = event.target.getAttribute('href');
+
+    if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('/'))) {
+        var currentUrl = new URL(window.location.href);
+        var currentPathSegments = currentUrl.pathname.split('/').filter(Boolean);
+        var firstSegment = currentPathSegments[0];
+
+        if (firstSegment) {
+            var targetUrl = new URL(href, window.location.origin);
+            var targetPathSegments = targetUrl.pathname.split('/').filter(Boolean);
+
+            targetPathSegments = targetPathSegments.filter(function(segment) {
+                return segment !== firstSegment;
+            });
+
+            targetPathSegments.unshift(firstSegment);
+
+            targetUrl.pathname = '/' + targetPathSegments.join('/');
+            event.target.href = targetUrl.toString();
+        }
     }
 }
 
