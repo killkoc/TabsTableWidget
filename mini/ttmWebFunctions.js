@@ -94,8 +94,7 @@ function ttmGymButtonClicked(event) {
 }
 
 function ttmGymChoiceClicked(event) {
-    var href = event.target.getAttribute('href');
-    if (href === null) href = event.currentTarget.getAttribute('href');
+    var href = event.currentTarget.getAttribute('href');
 
     if (href && href.startsWith('/')) {
         const currentUrl = new URL(window.location.href);
@@ -119,7 +118,7 @@ function ttmGymChoiceClicked(event) {
             const newPath = '/' + currentPathSegments.join('/');
 
             // Update the href attribute
-            event.target.href = currentUrl.origin + newPath;
+            event.currentTarget.href = currentUrl.origin + newPath;
         }
     }
 }
