@@ -165,58 +165,6 @@ function ttmSetLanguage(key, language) {
     return language;
 }
 
-/******
-// Function to switch to a specific language by modifying the URL pathname
-function ttmSwitchToLanguage(language) {
-    if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
-
-    const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty segments
-    const hasLanguage = pathParts[0] && pathParts[0].length === 2; // Check if the first segment is a language code
-
-    // Modify path parts based on the language provided
-    if (hasLanguage) {
-        if (language === '') {
-            // Remove the language part if the language is empty
-            pathParts.shift();
-        } else {
-            // Replace the existing language with the new one
-            pathParts[0] = language;
-        }
-    } else if (language !== '') {
-        // If no language is present and a valid one is provided, prepend it
-        pathParts.unshift(language);
-    }
-
-    const newPath = '/' + pathParts.join('/');
-    // Only update if there's a change
-    if (newPath !== window.location.pathname) {
-        window.location.pathname = newPath;
-    }
-    return pathParts.join('/');
-}
-
-// Function to set the language based on the key and provided language code
-function ttmSetLanguage(key, language) {
-    switch (language) {
-        case '':
-            // If language is empty, get it from the URL or localStorage
-            language = location.pathname.split('/')[1];
-            if (language.length !== 2) {
-                language = ttmGetLocalStorage(key);
-            }
-            break;
-        case 'en':
-            // If language is 'en', set it to empty string (default)
-            language = '';
-            break;
-    }
-    // Save the language to localStorage
-    ttmSetLocalStorage(key, language);
-
-    return language;
-}
-*******/
-
 // Helper function to check if a segment is a gym code
 function ttmIsGymCode(segment) {
     return segment.length === 2 && !ttmIsLanguageCode(segment);
