@@ -94,7 +94,8 @@ function ttmGymButtonClicked(event) {
 }
 
 function ttmGymChoiceClicked(event) {
-	const href = event.target.getAttribute('href');
+	var href = event.target.getAttribute('href');
+	if (href === null) href = event.currentTarget.getAttribute('href');
 debugger;
 	if (href && href.startsWith('/')) {
 		const currentUrl = new URL(window.location.href);
