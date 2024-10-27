@@ -355,8 +355,8 @@ function ttmGymChoiceClicked(event) {
         const newPath = '/' + pathSegments.join('/');
         const newUrl = currentUrl.origin + newPath;
 
-        // Navigate to the new URL without creating a new history entry
-        window.location.replace(newUrl);
+        // Navigate to the new URL
+        window.location.href = newUrl;
     }
 }
 
@@ -395,8 +395,8 @@ function ttmGymOptionClicked(event) {
         // Reconstruct the target URL pathname
         targetUrl.pathname = '/' + targetPathSegments.join('/');
 
-        // Navigate to the new URL without creating a new history entry
-        window.location.replace(targetUrl.toString());
+        // Navigate to the new URL
+        window.location.href = targetUrl.toString();
     }
 }
 
