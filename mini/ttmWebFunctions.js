@@ -3,7 +3,7 @@ function ttmGetLocalStorage(key) {
     if (typeof(Storage) !== 'undefined') {
         return localStorage.getItem(key);
     }
-    return 'undefined'; // Return 'undefined' as a string if localStorage is not available
+    return null; // Return null if localStorage is not available
 }
 
 // Function to store a value in localStorage
@@ -15,22 +15,29 @@ function ttmSetLocalStorage(key, value) {
 
 // Function to switch to a specific gym by updating the URL pathname
 function ttmSwitchToGym(gym) {
-    // Check if 'gym' is defined and not null
-    if (gym !== undefined && gym !== null) {
-        // Update the pathname to include the gym code
-        location.pathname = '/' + gym + location.pathname;
+    if (gym) {
+        const currentUrl = new URL(window.location.href);
+        let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
+
+        // Remove existing gym code if present
+        if (pathSegments[0] && pathSegments[0].length === 2) {
+            pathSegments[0] = gym;
+        } else {
+            pathSegments.unshift(gym);
+        }
+        currentUrl.pathname = '/' + pathSegments.join('/');
+        window.location.href = currentUrl.toString();
     }
 }
 
 // Function to set the gym location based on the URL or localStorage
 function ttmSetGymLocation() {
-    var gymLocation = location.pathname.split('/')[1]; // Get the first path segment
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    let gymLocation = pathSegments[0]; // Get the first path segment
 
-    if (gymLocation.length !== 2) {
-        // If the first segment is not a 2-character gym code, get it from localStorage
+    if (!gymLocation || gymLocation.length !== 2) {
         gymLocation = ttmGetLocalStorage('totem');
     } else {
-        // Save the gym code to localStorage
         ttmSetLocalStorage('totem', gymLocation);
     }
     return gymLocation;
@@ -41,7 +48,7 @@ function ttmSwitchToLanguage(language) {
     if (language == null || language.length > 2) return; // Explicit check for null or invalid language code
 
     const pathParts = location.pathname.split('/').filter(Boolean); // Remove empty segments
-    const hasLanguage = pathParts[0]?.length === 2; // Check if the first segment is a language code
+    const hasLanguage = pathParts[0] && pathParts[0].length === 2; // Check if the first segment is a language code
 
     // Modify path parts based on the language provided
     if (hasLanguage) {
@@ -89,11 +96,9 @@ function ttmSetLanguage(key, language) {
 
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymButtonsEventListener() {
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.gymButton').forEach(function(button) {
-            button.addEventListener('click', function(event) {
-                ttmGymChoiceClicked(event); // Pass the event to the function
-            });
+            button.addEventListener('click', ttmGymChoiceClicked);
         });
     });
 }
@@ -117,13 +122,14 @@ function ttmGymChoiceClicked(event) {
     event.preventDefault(); // Prevent the default action
 
     // Find the closest anchor or button element
-    var targetElement = event.target.closest('a, button');
+    let targetElement = event.target.closest('a, button');
+
     if (!targetElement) {
         return; // Exit if no valid element is found
     }
 
     // Get the gym location from 'href' or 'data-gym' attribute
-    var href = targetElement.getAttribute('href') || targetElement.getAttribute('data-gym');
+    let href = targetElement.getAttribute('href') || targetElement.getAttribute('data-gym');
 
     if (href && href.startsWith('/')) {
         const currentUrl = new URL(window.location.href);
