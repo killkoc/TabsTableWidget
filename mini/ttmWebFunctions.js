@@ -411,4 +411,4 @@ var ttmLocation = ttmGetLocalStorage('totem');
 var ttmLanguage = ttmGetLocalStorage('ttmLanguage');
 
 // Global variable to store the default language for the site
-var ttmDefaultLanguage = 'en';
+var ttmDefaultLanguage = 'fr';
