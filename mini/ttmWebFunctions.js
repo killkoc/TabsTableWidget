@@ -20,7 +20,7 @@ debugger;    ttmDefaultLanguage = language;
 
 // Get default Language from local storage
 function ttmGetDefaultLanguage() {
-        /***    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
+debugger;         /***    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
             
             // Check if default language is already set in localStorage
             if (!defaultLanguage) {
@@ -104,6 +104,8 @@ function ttmInsertLanguage(pathSegments, language) {
  * @param {string} language - The language code to switch to.
  */
 function ttmSwitchToLanguage(language) {
+    event.preventDefault(); // Prevent the default action
+    
     if (!ttmIsLanguageCode(language)) {
         console.error('Invalid language code:', language);
         return;
@@ -142,7 +144,6 @@ function ttmSetLanguage(key, language) {
     }
     // Save the language to localStorage
     ttmSetLocalStorage(key, language);
-    ttmLanguage = language;
 
     return language;
 }
@@ -390,9 +391,6 @@ function ttmGymOptionClicked(event) {
 
 // Global variable to store the gym location
 var ttmLocation = ttmGetLocalStorage('totem');
-
-// Global variable to store the gym location
-var ttmLanguage = ttmGetLocalStorage('ttmLanguage');
 
 // Global variable to store the default language for the site
 var ttmDefaultLanguage = 'fr';
