@@ -124,7 +124,7 @@ debugger;    if (event) event.preventDefault(); // Prevent the default action
         currentUrl.pathname = newPath;
 
         // Navigate to the new URL without creating a new history entry
-        window.location.replace(currentUrl.toString(););
+        window.location.replace(currentUrl.toString());
     }
     return language;
 }
