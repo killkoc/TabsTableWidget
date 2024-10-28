@@ -105,7 +105,7 @@ function ttmInsertLanguage(pathSegments, language) {
  * @param {string} language - The language code to switch to.
  */
 function ttmSwitchToLanguage(language, event) {
-    if (event) event.preventDefault(); // Prevent the default action
+debugger;    if (event) event.preventDefault(); // Prevent the default action
     
     if (!ttmIsLanguageCode(language)) {
         console.error('Invalid language code:', language);
