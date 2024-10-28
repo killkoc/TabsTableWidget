@@ -116,13 +116,12 @@ function ttmRemoveLanguage(pathSegments) {
  * @param {string} language - The language code to switch to.
  */
 function ttmSwitchToLanguage(language) {
-    if (!language || language.length > 2) return; // Invalid language code
-
     if (!ttmIsLanguageCode(language)) {
         console.error('Invalid language code:', language);
         return;
     }
     const defaultLanguage = ttmGetDefaultLanguage();
+    if (language === defaultLanguage) language ='';
 
     const currentUrl = new URL(window.location.href);
     let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
