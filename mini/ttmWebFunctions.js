@@ -99,18 +99,6 @@ function ttmInsertLanguage(pathSegments, language) {
 }
 
 /**
- * Removes the language code from the path segments.
- * @param {Array} pathSegments - Array of path segments.
- * @returns {Array} - Modified array of path segments without the language code.
- */
-function ttmRemoveLanguage(pathSegments) {
-    if (pathSegments.length > 0 && ttmIsLanguageCode(pathSegments[0])) {
-        return pathSegments.slice(1);
-    }
-    return pathSegments.slice();
-}
-
-/**
  * Switches the current URL to the specified language.
  * Omits the default language code from the URL.
  * @param {string} language - The language code to switch to.
@@ -122,13 +110,9 @@ function ttmSwitchToLanguage(language) {
     }
     const defaultLanguage = ttmGetDefaultLanguage();
  debugger;
-    if (language === defaultLanguage) language = '';
 
     const currentUrl = new URL(window.location.href);
     let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
-
-    // Remove existing language code if present
-    pathSegments = ttmRemoveLanguage(pathSegments);
 
     // Insert the new language code
     pathSegments = ttmInsertLanguage(pathSegments, language);
