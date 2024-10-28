@@ -14,19 +14,20 @@ function ttmSetLocalStorage(key, value) {
 }
 
 // Set the default Language for a given site
-function ttmSetDefaultLanguage(defaultLanguage) {
-    ttmSetLocalStorage('ttmDefaultLang', defaultLanguage);
+function ttmSetDefaultLanguage(language) {
+    ttmDefaultLanguage = language;
 }
 
 // Get default Language from local storage
 function ttmGetDefaultLanguage() {
-    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
-    
-    // Check if default language is already set in localStorage
-    if (!defaultLanguage) {
-        defaultLanguage = 'en';
-    }
-    return defaultLanguage;
+        /***    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
+            
+            // Check if default language is already set in localStorage
+            if (!defaultLanguage) {
+                defaultLanguage = 'en';
+            }
+        ***/
+    return ttmDefaultLanguage;
 }
 
 /**
@@ -157,6 +158,7 @@ function ttmSetLanguage(key, language) {
     }
     // Save the language to localStorage
     ttmSetLocalStorage(key, language);
+    ttmLanguage = language;
 
     return language;
 }
@@ -293,6 +295,8 @@ function ttmSetGymLocation() {
         // If gym code is found in the URL, save it to localStorage
         ttmSetLocalStorage('totem', gymLocation);
     }
+    ttmLocation = gymLocation;
+    
     return gymLocation;
 }
 
@@ -402,3 +406,9 @@ function ttmGymOptionClicked(event) {
 
 // Global variable to store the gym location
 var ttmLocation = ttmGetLocalStorage('totem');
+
+// Global variable to store the gym location
+var ttmLanguage = ttmGetLocalStorage('ttmLanguage');
+
+// Global variable to store the default language for the site
+var ttmDefaultLanguage = 'en';
