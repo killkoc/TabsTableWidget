@@ -15,7 +15,7 @@ function ttmSetLocalStorage(key, value) {
 
 // Set the default Language for a given site
 function ttmSetDefaultLanguage(language) {
-    ttmDefaultLanguage = language;
+debugger;    ttmDefaultLanguage = language;
 }
 
 // Get default Language from local storage
