@@ -101,10 +101,11 @@ function ttmInsertLanguage(pathSegments, language) {
 /**
  * Switches the current URL to the specified language.
  * Omits the default language code from the URL.
+ * @param pointer event - event if click or null.
  * @param {string} language - The language code to switch to.
  */
-function ttmSwitchToLanguage(language) {
-    event.preventDefault(); // Prevent the default action
+function ttmSwitchToLanguage(language, event) {
+    if (event) event.preventDefault(); // Prevent the default action
     
     if (!ttmIsLanguageCode(language)) {
         console.error('Invalid language code:', language);
@@ -121,7 +122,9 @@ function ttmSwitchToLanguage(language) {
     // Only update if there's a change
     if (newPath !== currentUrl.pathname) {
         currentUrl.pathname = newPath;
-        window.location.href = currentUrl.toString();
+
+        // Navigate to the new URL without creating a new history entry
+        window.location.replace(currentUrl.toString(););
     }
     return language;
 }
@@ -342,8 +345,8 @@ function ttmGymChoiceClicked(event) {
         const newPath = '/' + pathSegments.join('/');
         const newUrl = currentUrl.origin + newPath;
 
-        // Navigate to the new URL
-        window.location.href = newUrl;
+        // Navigate to the new URL without creating a new history entry
+        window.location.replace(newUrl);
     }
 }
 
