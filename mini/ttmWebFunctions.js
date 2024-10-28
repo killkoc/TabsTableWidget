@@ -15,12 +15,12 @@ function ttmSetLocalStorage(key, value) {
 
 // Set the default Language for a given site
 function ttmSetDefaultLanguage(language) {
-debugger;    ttmDefaultLanguage = language;
+    ttmDefaultLanguage = language;
 }
 
 // Get default Language from local storage
 function ttmGetDefaultLanguage() {
-debugger;         /***    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
+         /***    let defaultLanguage = ttmGetLocalStorage('ttmDefaultLang');
             
             // Check if default language is already set in localStorage
             if (!defaultLanguage) {
@@ -111,8 +111,6 @@ function ttmSwitchToLanguage(language) {
         return;
     }
     const defaultLanguage = ttmGetDefaultLanguage();
- debugger;
-
     const currentUrl = new URL(window.location.href);
     let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
 
