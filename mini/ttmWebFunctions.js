@@ -129,6 +129,40 @@ function ttmSwitchToLanguage(language, event) {
     return language;
 }
 
+// Function to handle the click event for language options menu
+function ttmLanguageOptionClicked(event) {
+    event.preventDefault(); // Prevent the default action
+
+    // Get the href of the clicked element
+    let href = event.target.getAttribute('href');
+
+    if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('/'))) {
+        // Parse the target URL
+        let targetUrl = new URL(href, window.location.origin);
+        let targetPathSegments = targetUrl.pathname.split('/').filter(Boolean);
+
+        // Check if the target URL has language or gym code
+        let targetLanguage = ttmFindLanguage(targetPathSegments);
+
+        // Get the current language and gym code from the current URL
+        let currentPathSegments = window.location.pathname.split('/').filter(Boolean);
+        let currentLanguage = ttmFindLanguage(currentPathSegments);
+
+        // Retrieve default language
+        const defaultLanguage = ttmGetDefaultLanguage();
+
+        // Insert current language code if missing in the target URL
+        if (!targetLanguage && currentLanguage) {
+            targetPathSegments = ttmInsertLanguage(targetPathSegments, currentLanguage);
+        }
+        // Reconstruct the target URL pathname
+        targetUrl.pathname = '/' + targetPathSegments.join('/');
+
+        // Navigate to the new URL
+        window.location.href = targetUrl.toString();
+    }
+}
+
 /**
  * Sets the language based on the provided language code or retrieves it from the URL or localStorage.
  * @param {string} key - The localStorage key for the language setting.
