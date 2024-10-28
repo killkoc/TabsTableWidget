@@ -121,7 +121,8 @@ function ttmSwitchToLanguage(language) {
         return;
     }
     const defaultLanguage = ttmGetDefaultLanguage();
-    if (language === defaultLanguage) language ='';
+ debugger;
+    if (language === defaultLanguage) language = '';
 
     const currentUrl = new URL(window.location.href);
     let pathSegments = currentUrl.pathname.split('/').filter(Boolean);
