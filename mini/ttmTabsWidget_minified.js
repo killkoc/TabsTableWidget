@@ -164,11 +164,10 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
      */
     function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
-        tabElement.className = 'flex-auto ml-0 last:mr-0 text-center bg-gray-400 text-white rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `<div class="text-xs font-semibold uppercase px-3 py-3 block leading-normal">${category}</div>`;
+        tabElement.className = 'ttmTW-flex-auto ttmTW-ml-0 last:ttmTW-mr-0 ttmTW-text-center ttmTW-bg-gray-400 ttmTW-text-white ttmTW-rounded-t-xl ttmTab-element';
+        tabElement.innerHTML = `<div class="ttmTW-text-xs ttmTW-font-semibold ttmTW-uppercase ttmTW-px-3 ttmTW-py-3 ttmTW-block ttmTW-leading-normal ttmTW-text-center">${category}</div>`;
         return tabElement;
     }
-
 
     /**
      * Switch to a specific tab in the tabbed widget.
