@@ -164,10 +164,14 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
      */
     function createTab(widgetElement, widgetId, category, index) {
         const tabElement = document.createElement('li');
-        tabElement.className = 'ttmTW-flex-auto ttmTW-ml-0 last:ttmTW-mr-0 ttmTW-bg-gray-400 ttmTW-text-white ttmTW-rounded-t-xl ttmTab-element';
-        tabElement.innerHTML = `<div class="ttmTW-flex ttmTW-justify-center ttmTW-items-center ttmTW-text-xs ttmTW-font-semibold ttmTW-uppercase ttmTW-px-3 ttmTW-py-3 ttmTW-block ttmTW-leading-normal">${category}</div>`;
+        // On rend le <li> lui-même un conteneur flex qui centre son contenu
+        tabElement.className = 'ttmTW-flex-auto ttmTW-flex ttmTW-justify-center ttmTW-items-center ttmTW-ml-0 last:ttmTW-mr-0 ttmTW-bg-gray-400 ttmTW-text-white ttmTW-rounded-t-xl ttmTab-element';
+        // On peut même supprimer l'intérieur <div> si ce n'est pas nécessaire, ou le garder pour le style
+        tabElement.innerHTML = `<div class="ttmTW-text-xs ttmTW-font-semibold ttmTW-uppercase ttmTW-px-3 ttmTW-py-3">${category}</div>`;
         return tabElement;
     }
+
+    
     /**
      * Switch to a specific tab in the tabbed widget.
      * 
