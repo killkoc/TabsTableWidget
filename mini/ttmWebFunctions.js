@@ -307,6 +307,7 @@ function ttmSwitchToGym(gym) {
 function ttmSetGymLocation() {
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
     let gymLocation = ttmFindGym(pathSegments); // Use findGym to get the gym code
+console.log("find Gym " + gymLocation); 
 
     if (!gymLocation) {
         // If no gym code in the URL, retrieve it from localStorage
@@ -316,7 +317,6 @@ function ttmSetGymLocation() {
         ttmSetLocalStorage('totem', gymLocation);
     }
     ttmLocation = gymLocation;
-console.log("Set Gym " + gymLocation); 
     
     return gymLocation;
 }
