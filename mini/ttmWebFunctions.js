@@ -331,6 +331,8 @@ function ttmAddGymButtonsEventListener() {
 
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymNavEventListener() {
+    return;
+
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.gymButton').forEach(function(button) {
             button.addEventListener('click', ttmGymChoiceClicked);
