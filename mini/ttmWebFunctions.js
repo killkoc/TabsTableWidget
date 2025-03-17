@@ -307,7 +307,6 @@ function ttmSwitchToGym(gym) {
 function ttmSetGymLocation() {
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
     let gymLocation = ttmFindGym(pathSegments); // Use findGym to get the gym code
-console.log("find Gym " + gymLocation); 
 
     if (!gymLocation) {
         // If no gym code in the URL, retrieve it from localStorage
@@ -332,8 +331,6 @@ function ttmAddGymButtonsEventListener() {
 
 // Function to add click event listeners to elements with class 'gymButton' when the document is ready
 function ttmAddGymNavEventListener() {
-    return;
-
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.gymButton').forEach(function(button) {
             button.addEventListener('click', ttmGymChoiceClicked);
@@ -341,9 +338,9 @@ function ttmAddGymNavEventListener() {
         document.querySelectorAll('.ttmGymChoicesClass').forEach(function(button) {
             button.addEventListener('click', ttmGymChoiceClicked);
         });
-        document.querySelectorAll('.ttmGymOptionsClass').forEach(function(button) {
-            button.addEventListener('click', ttmGymOptionClicked);
-        });
+//        document.querySelectorAll('.ttmGymOptionsClass').forEach(function(button) {
+//            button.addEventListener('click', ttmGymOptionClicked);
+//        });
     });
 }
 
