@@ -316,6 +316,7 @@ function ttmSetGymLocation() {
         ttmSetLocalStorage('totem', gymLocation);
     }
     ttmLocation = gymLocation;
+console.log("Set Gym " + gymLocation); 
     
     return gymLocation;
 }
