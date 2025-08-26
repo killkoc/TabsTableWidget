@@ -32,9 +32,9 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     
     const gsheetURL = gSheetID.startsWith('2PAC')
       // Legacy publish-to-web CSV (2PACX id)
-      ? `https://docs.google.com/spreadsheets/d/e/${gSheetID}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`
+      ? `https://docs.google.com/spreadsheets/d/e/${gSheetID}/pub?output=csv`
       // Stable fileId export (normal Google Sheet id)
-      : `https://docs.google.com/spreadsheets/d/${gSheetID}/export?format=csv&gid=${encodeURIComponent(gid)}`;
+      : `https://docs.google.com/spreadsheets/d/${gSheetID}/export?format=csv&gid=${encodeURIComponent(gID)}`;
 debugger;
     try {
         // Fetch the Google Sheet data and parse the CSV
