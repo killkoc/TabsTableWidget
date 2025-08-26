@@ -51,7 +51,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
   }
 */
   const gid = widgetElement.getAttribute('data-ttmGID') || '0';
-debugger;  
+
   // Build candidates depending on id type.
   // If id starts with 2PACX- → legacy publish-to-web CSVs (old method).
   // Else treat it as a real fileId → stable export CSVs (new method).
@@ -65,7 +65,7 @@ debugger;
         `https://docs.google.com/spreadsheets/d/${gsid}/export?format=csv&gid=${encodeURIComponent(gid)}`,
         `https://docs.google.com/spreadsheets/d/${gsid}/gviz/tq?tqx=out:csv&gid=${encodeURIComponent(gid)}`
       ];
-  
+debugger;
   try {
     const csvText = await fetchFirstWorkingCsv(candidateUrls);
     const rows    = parseCSV(csvText, widgetId);
