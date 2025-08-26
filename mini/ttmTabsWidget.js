@@ -50,11 +50,8 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     displayNoDataMessage(widgetElement);
   }
 */
-  const id  = gsid; // can be 2PACX-* OR a real fileId
   const gid = widgetElement.getAttribute('data-ttmGID') || '0';
-  
-  const gid = widgetElement.getAttribute('data-ttmGID') || '0';
-  
+debugger;  
   // Build candidates depending on id type.
   // If id starts with 2PACX- → legacy publish-to-web CSVs (old method).
   // Else treat it as a real fileId → stable export CSVs (new method).
