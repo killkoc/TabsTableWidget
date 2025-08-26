@@ -53,8 +53,24 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
   const id  = gsid; // can be 2PACX-* OR a real fileId
   const gid = widgetElement.getAttribute('data-ttmGID') || '0';
   
+  const gid = widgetElement.getAttribute('data-ttmGID') || '0';
+  
+  // Build candidates depending on id type.
+  // If id starts with 2PACX- → legacy publish-to-web CSVs (old method).
+  // Else treat it as a real fileId → stable export CSVs (new method).
+  const candidateUrls = gsid.startsWith('2PAC')
+    ? [
+        `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`,
+        `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?gid=${encodeURIComponent(gid)}&output=csv`,
+        `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?output=csv`
+      ]
+    : [
+        `https://docs.google.com/spreadsheets/d/${gsid}/export?format=csv&gid=${encodeURIComponent(gid)}`,
+        `https://docs.google.com/spreadsheets/d/${gsid}/gviz/tq?tqx=out:csv&gid=${encodeURIComponent(gid)}`
+      ];
+  
   try {
-    const csvText = await fetchCsvDualStrategy(id, gid);
+    const csvText = await fetchFirstWorkingCsv(candidateUrls);
     const rows    = parseCSV(csvText, widgetId);
   
     widgetElement.innerHTML = ''; // wipe any placeholder content
@@ -66,19 +82,8 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     }
   } catch (err) {
     console.error('Error fetching Google Sheet data:', err);
-
-    // If it's a 2PACX id and CSV is blocked, fall back to the working pubhtml iframe
-    if (/^2PACX-/.test(id)) {
-      const iframeUrl = `https://docs.google.com/spreadsheets/d/e/${id}/pubhtml?gid=${encodeURIComponent(gid)}&single=true&widget=true&headers=false`;
-      widgetElement.innerHTML = `
-        <div class="ttmTW-w-full ttmTW-my-4">
-          <iframe src="${iframeUrl}" style="width:100%;height:600px;border:0;overflow:auto"></iframe>
-        </div>`;
-      return;
-    }
-    displayNoDataMessage(widgetElement);
+    displayNoDataMessage(widgetElement); // same behavior as before
   }
-
   // ───────────────────────────────────────────────────────────────────────────
   //  Helpers – fetch & parse
   // ───────────────────────────────────────────────────────────────────────────
@@ -87,7 +92,31 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     return res.text();
   }
-
+  
+  async function fetchFirstWorkingCsv(urls) {
+    let lastErr;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url); // keep default options to avoid side-effects
+        if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+        const text = await res.text();
+  
+        // If Google returns an HTML interstitial (e.g. “Sorry, unable to open…”), try next URL.
+        if (/^\s*<!doctype|^\s*<html/i.test(text)) throw new Error('HTML instead of CSV');
+  
+        // Minimal sanity: header + at least one row. If empty, try next.
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) throw new Error('Empty CSV');
+  
+        return text; // success
+      } catch (e) {
+        lastErr = e;
+        console.warn('[GSTWidget] CSV candidate failed:', url, e.message);
+      }
+    }
+    throw lastErr || new Error('All CSV candidates failed');
+  }
+  
   function parseCSV(text, id) {
     console.timeEnd(id); // stop timer
 
