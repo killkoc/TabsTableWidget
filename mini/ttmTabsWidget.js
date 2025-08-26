@@ -30,6 +30,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 
   console.time(widgetId); // perf timer starts
 
+  /*
   const gsheetURL = gsid.startsWith('2PAC')
     ? `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?output=csv`
     : `https://docs.google.com/spreadsheets/d/${gsid}/pub?output=csv`;
@@ -49,10 +50,41 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     console.error('Error fetching Google Sheet data:', err);
     displayNoDataMessage(widgetElement);
   }
+  */
+  const id  = gsid; // can be 2PACX-* OR a real fileId
+  const gid = widgetElement.getAttribute('data-ttmGID') || '0';
+  
+  try {
+    const csvText = await fetchCsvDualStrategy(id, gid);
+    const rows    = parseCSV(csvText, widgetId);
+  
+    widgetElement.innerHTML = ''; // wipe any placeholder content
+  
+    if (widgetType === 'ttmTabsWidget') {
+      initializeTabs(widgetElement, widgetId, rows);
+    } else {
+      initializeTable(widgetElement, widgetId, rows);
+    }
+  } catch (err) {
+    console.error('Error fetching Google Sheet data:', err);
+
+    // If it's a 2PACX id and CSV is blocked, fall back to the working pubhtml iframe
+    if (/^2PACX-/.test(id)) {
+      const iframeUrl = `https://docs.google.com/spreadsheets/d/e/${id}/pubhtml?gid=${encodeURIComponent(gid)}&single=true&widget=true&headers=false`;
+      widgetElement.innerHTML = `
+        <div class="ttmTW-w-full ttmTW-my-4">
+          <iframe src="${iframeUrl}" style="width:100%;height:600px;border:0;overflow:auto"></iframe>
+        </div>`;
+      return;
+    }
+  
+    displayNoDataMessage(widgetElement);
+  }
 
   // ───────────────────────────────────────────────────────────────────────────
   //  Helpers – fetch & parse
   // ───────────────────────────────────────────────────────────────────────────
+  /*
   async function fetchGSheetData(url) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -72,6 +104,49 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
       const cells = line.split(',');
       return Object.fromEntries(headers.map((h, i) => [h, cells[i] || '']));
     });
+  }
+  */
+  async function fetchCsvDualStrategy(id, gid) {
+    const is2PACX = /^2PACX-/.test(id);
+  
+    // If it's 2PACX → use legacy publish-to-web CSV endpoints
+    if (is2PACX) {
+      return await fetchCsvFromUrls([
+        `https://docs.google.com/spreadsheets/d/e/${id}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`,
+        `https://docs.google.com/spreadsheets/d/e/${id}/pub?gid=${encodeURIComponent(gid)}&output=csv`,
+        `https://docs.google.com/spreadsheets/d/e/${id}/pub?output=csv`,
+      ]);
+    }
+  
+    // Else treat it as a fileId → stable export endpoints
+    return await fetchCsvFromUrls([
+      `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${encodeURIComponent(gid)}`,
+      `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${encodeURIComponent(gid)}`,
+    ]);
+  }
+  
+  async function fetchCsvFromUrls(urls) {
+    let lastErr;
+    for (const url of urls) {
+      try {
+        const res  = await fetch(url, { credentials: 'omit', cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+        const text = await res.text();
+  
+        // Reject HTML / interstitials (e.g., “Sorry, unable to open the file”)
+        if (/^\s*<!doctype|^\s*<html/i.test(text)) throw new Error('HTML instead of CSV');
+  
+        // Sanity check: header + at least one data row
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) throw new Error('Empty CSV');
+  
+        return text;
+      } catch (e) {
+        lastErr = e;
+        console.warn('[GSTWidget] CSV candidate failed', url, e.message);
+      }
+    }
+    throw lastErr || new Error('All CSV fetch attempts failed');
   }
 
   // ───────────────────────────────────────────────────────────────────────────
