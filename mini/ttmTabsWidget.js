@@ -35,6 +35,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
       ? `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`
       // Stable fileId export (normal Google Sheet id)
       : `https://docs.google.com/spreadsheets/d/${gsid}/export?format=csv&gid=${encodeURIComponent(gid)}`;
+debugger;
     try {
         // Fetch the Google Sheet data and parse the CSV
         const GSheetData = await fetchGSheetData(GSheetURL);
