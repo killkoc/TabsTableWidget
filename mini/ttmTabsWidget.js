@@ -17,8 +17,8 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     widgetElement.id = widgetId;
     
     // Retrieve the Google Sheet ID from the widgetElement's data attributes
-    const GSheetID = widgetElement.getAttribute('data-ttmGSID');
-    if (!GSheetID) {
+    const gSheetID = widgetElement.getAttribute('data-ttmGSID');
+    if (!gSheetID) {
         // Display a message when there's no data to be loaded
         displayNoDataMessage(widgetElement);
         return;
@@ -28,13 +28,13 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     console.time(widgetId);
 
     // Generate the URL to access the Google Sheet in CSV format
-    const gid = widgetElement.getAttribute('data-ttmGID') || '0';
+    const gID = widgetElement.getAttribute('data-ttmGID') || '0';
     
-    const gsheetURL = gsid.startsWith('2PAC')
+    const gsheetURL = gSheetID.startsWith('2PAC')
       // Legacy publish-to-web CSV (2PACX id)
-      ? `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`
+      ? `https://docs.google.com/spreadsheets/d/e/${gSheetID}/pub?gid=${encodeURIComponent(gid)}&single=true&output=csv`
       // Stable fileId export (normal Google Sheet id)
-      : `https://docs.google.com/spreadsheets/d/${gsid}/export?format=csv&gid=${encodeURIComponent(gid)}`;
+      : `https://docs.google.com/spreadsheets/d/${gSheetID}/export?format=csv&gid=${encodeURIComponent(gid)}`;
 debugger;
     try {
         // Fetch the Google Sheet data and parse the CSV
