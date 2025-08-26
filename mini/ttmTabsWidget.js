@@ -30,7 +30,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     // Generate the URL to access the Google Sheet in CSV format
     const gID = widgetElement.getAttribute('data-ttmGID') || '0';
     
-    const gsheetURL = gSheetID.startsWith('2PAC')
+    const gSheetURL = gSheetID.startsWith('2PAC')
       // Legacy publish-to-web CSV (2PACX id)
       ? `https://docs.google.com/spreadsheets/d/e/${gSheetID}/pub?output=csv`
       // Stable fileId export (normal Google Sheet id)
@@ -38,8 +38,8 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 debugger;
     try {
         // Fetch the Google Sheet data and parse the CSV
-        const GSheetData = await fetchGSheetData(GSheetURL);
-        const parsedCSVData = await parseCSV(GSheetData, widgetId);
+        const gSheetData = await fetchGSheetData(gSheetURL);
+        const parsedCSVData = await parseCSV(gSheetData, widgetId);
         
         // Clear the widget element to prepare for the new content
         widgetElement.innerHTML = '';
@@ -64,9 +64,9 @@ debugger;
      * @returns {Promise<string>} - A promise that resolves with the fetched CSV data.
      * @throws Will throw an error if the fetch operation fails.
      */
-    async function fetchGSheetData(GSheetURL) {
+    async function fetchGSheetData(gSheetURL) {
         // Send a network request to fetch the data from the Google Sheet
-        const response = await fetch(GSheetURL);
+        const response = await fetch(gSheetURL);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -108,9 +108,9 @@ debugger;
      * 
      * @param {Element} widgetElement - The HTML element to host the widget.
      * @param {string} widgetId - The ID of the widget.
-     * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
+     * @param {Array<Object>} gSheetData - The parsed data from the Google Sheet.
      */
-    function initializeTabs(widgetElement, widgetId, GSheetData) {
+    function initializeTabs(widgetElement, widgetId, gSheetData) {
         // Add child structure in preparation for tabs
         const structure = document.createElement('div');
         structure.className = "ttmTW-flex ttmTW-justify-center";
@@ -119,11 +119,11 @@ debugger;
 
         // Find the tab bar element and determine the category name for tabs
         const tabBar = widgetElement.querySelector('ul');
-        const categoryName = Object.keys(GSheetData[0])[0];
+        const categoryName = Object.keys(gSheetData[0])[0];
 
         // Create a map to store rows of data by category
         const tabDataMap = {};
-        GSheetData.forEach(row => {
+        gSheetData.forEach(row => {
             const category = row[categoryName];
             if (!tabDataMap[category]) {
                 tabDataMap[category] = [];
@@ -265,9 +265,9 @@ debugger;
      * 
      * @param {Element} widgetElement - The HTML element to host the widget.
      * @param {string} widgetId - The ID of the widget.
-     * @param {Array<Object>} GSheetData - The parsed data from the Google Sheet.
+     * @param {Array<Object>} gSheetData - The parsed data from the Google Sheet.
      */
-    function initializeTable(widgetElement, widgetId, GSheetData) {
+    function initializeTable(widgetElement, widgetId, gSheetData) {
         // Add child structure in preparation for table
         const structure = document.createElement('div');
         structure.className = "ttmTW-flex ttmTW-justify-center";
@@ -276,7 +276,7 @@ debugger;
 
         // Find the table container and create the table element
         const tableContainer = widgetElement.querySelector('.widget-container');
-        const tableElement = createTableElement(GSheetData);
+        const tableElement = createTableElement(gSheetData);
         const divTableElement = document.createElement('div');
         divTableElement.className = "ttmTW-relative ttmTW-overflow-x-auto ttmTW-shadow-sm sm:ttmTW-rounded-lg";
         divTableElement.appendChild(tableElement);
