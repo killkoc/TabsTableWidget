@@ -29,7 +29,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
   }
 
   console.time(widgetId); // perf timer starts
-
+/*
   const gsheetURL = gsid.startsWith('2PAC')
     ? `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?output=csv`
     : `https://docs.google.com/spreadsheets/d/${gsid}/pub?output=csv`;
@@ -49,7 +49,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     console.error('Error fetching Google Sheet data:', err);
     displayNoDataMessage(widgetElement);
   }
-/*
+*/
   const id  = gsid; // can be 2PACX-* OR a real fileId
   const gid = widgetElement.getAttribute('data-ttmGID') || '0';
   
@@ -76,7 +76,6 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         </div>`;
       return;
     }
-  */
     displayNoDataMessage(widgetElement);
   }
 
