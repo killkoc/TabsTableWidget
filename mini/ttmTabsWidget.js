@@ -30,7 +30,6 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
 
   console.time(widgetId); // perf timer starts
 
-  /*
   const gsheetURL = gsid.startsWith('2PAC')
     ? `https://docs.google.com/spreadsheets/d/e/${gsid}/pub?output=csv`
     : `https://docs.google.com/spreadsheets/d/${gsid}/pub?output=csv`;
@@ -50,7 +49,7 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
     console.error('Error fetching Google Sheet data:', err);
     displayNoDataMessage(widgetElement);
   }
-  */
+/*
   const id  = gsid; // can be 2PACX-* OR a real fileId
   const gid = widgetElement.getAttribute('data-ttmGID') || '0';
   
@@ -77,14 +76,13 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
         </div>`;
       return;
     }
-  
+  */
     displayNoDataMessage(widgetElement);
   }
 
   // ───────────────────────────────────────────────────────────────────────────
   //  Helpers – fetch & parse
   // ───────────────────────────────────────────────────────────────────────────
-  /*
   async function fetchGSheetData(url) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -105,7 +103,6 @@ async function ttmCreateGSTWidget(widgetElement, widgetIndex, widgetType) {
       return Object.fromEntries(headers.map((h, i) => [h, cells[i] || '']));
     });
   }
-  */
   async function fetchCsvDualStrategy(id, gid) {
     const is2PACX = /^2PACX-/.test(id);
   
